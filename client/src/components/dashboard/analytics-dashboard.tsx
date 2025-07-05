@@ -16,7 +16,7 @@ interface AnalyticsDashboardProps {
 
 export default function AnalyticsDashboard({ timelineData }: AnalyticsDashboardProps) {
   // Préparer les données pour le graphique empilé
-  const chartData = timelineData.slice(-30).map((item, index) => ({
+  const chartData = timelineData.slice(-60).map((item, index) => ({
     name: format(new Date(item.timestamp), 'HH:mm'),
     people: item.people,
     vehicles: item.vehicles,
@@ -38,7 +38,7 @@ export default function AnalyticsDashboard({ timelineData }: AnalyticsDashboardP
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-            Détections par minute (30 min)
+            Détections par minute (60 min)
           </CardTitle>
         </CardHeader>
         <CardContent>
