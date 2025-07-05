@@ -219,7 +219,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             </Badge>
             <Badge variant={isModelLoaded ? "default" : "secondary"} className="bg-slate-700">
               <Brain className="mr-1 h-3 w-3" />
-              {isModelLoaded ? "YOLO v3" : "LOADING"}
+              {isModelLoaded ? "SSDLite" : "LOADING"}
             </Badge>
             {yoloError && (
               <Badge variant="destructive" className="bg-destructive">
@@ -304,7 +304,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             <div className="bg-destructive/20 border border-destructive/50 rounded-lg p-3">
               <div className="flex items-center space-x-2">
                 <AlertCircle className="h-4 w-4 text-destructive" />
-                <span className="text-sm text-destructive">Tiny YOLOv3 Error: {yoloError}</span>
+                <span className="text-sm text-destructive">SSDLite MobileNetV2 Error: {yoloError}</span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
                 Using fallback detection mode for demonstration purposes
@@ -329,7 +329,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
               <div className="flex items-center space-x-2 text-xs text-slate-400">
                 <Brain className="h-3 w-3" />
                 <span>
-                  {isModelLoaded ? "Tiny YOLOv3 Ready (34MB)" : "Loading Tiny YOLOv3..."}
+                  {isModelLoaded ? "SSDLite MobileNetV2 Ready" : "Loading SSDLite MobileNetV2..."}
                 </span>
               </div>
             </div>
