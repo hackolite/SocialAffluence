@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl';
-import * as cocoSsd from '@tensorflow-models/coco-ssd';
 
 interface DetectionBox {
   x: number;
@@ -40,34 +39,58 @@ const COCO_CLASSES = [
 const VEHICLE_CLASSES = [1, 2, 3, 5, 6, 7, 8]; // bicycle, car, motorcycle, bus, train, truck, boat
 
 export function useYoloDetection() {
-  const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
+  const [model, setModel] = useState<tf.GraphModel | null>(null);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const modelRef = useRef<cocoSsd.ObjectDetection | null>(null);
+  const modelRef = useRef<tf.GraphModel | null>(null);
 
-  // Load COCO-SSD model (reliable alternative to YOLO)
+  // Load Tiny YOLOv3 model (34MB)
   useEffect(() => {
     const loadModel = async () => {
       try {
-        console.log('Loading COCO-SSD object detection model...');
+        console.log('Loading Tiny YOLOv3 model...');
         setError(null);
         
         // Initialize TensorFlow.js backend
         await tf.ready();
         console.log('TensorFlow.js backend ready');
         
-        // Load COCO-SSD model (much more reliable than raw YOLO)
-        const loadedModel = await cocoSsd.load();
+        // Try multiple CDN sources for Tiny YOLOv3
+        const modelUrls = [
+          'https://cdn.jsdelivr.net/gh/shaqian/tfjs-yolo@master/dist/v3tiny/model.json',
+          'https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/dist/v3tiny/model.json',
+          'https://cdn.jsdelivr.net/gh/shaqian/tfjs-yolo-demo@master/dist/v3tiny/model.json'
+        ];
         
-        modelRef.current = loadedModel;
-        setModel(loadedModel);
-        setIsModelLoaded(true);
-        console.log('COCO-SSD model loaded successfully');
+        let modelLoaded = false;
+        
+        for (const modelUrl of modelUrls) {
+          try {
+            console.log(`Attempting to load Tiny YOLOv3 from: ${modelUrl}`);
+            const loadedModel = await tf.loadGraphModel(modelUrl);
+            
+            modelRef.current = loadedModel;
+            setModel(loadedModel);
+            setIsModelLoaded(true);
+            modelLoaded = true;
+            console.log('Tiny YOLOv3 model loaded successfully (34MB)');
+            break;
+          } catch (modelError) {
+            console.warn(`Failed to load from ${modelUrl}:`, modelError);
+            continue;
+          }
+        }
+        
+        if (!modelLoaded) {
+          console.warn('All Tiny YOLOv3 URLs failed, using fallback detection');
+          setError('Tiny YOLOv3 model unavailable - using fallback mode');
+          setIsModelLoaded(true); // Allow fallback mode
+        }
         
       } catch (err) {
-        console.error('Error loading COCO-SSD model:', err);
-        setError('Failed to load AI model. Using fallback detection.');
+        console.error('Error loading Tiny YOLOv3 model:', err);
+        setError('Failed to load Tiny YOLOv3 model. Using fallback detection.');
         setIsModelLoaded(true); // Allow fallback mode
       }
     };
@@ -75,12 +98,134 @@ export function useYoloDetection() {
     loadModel();
 
     return () => {
-      // COCO-SSD models don't need manual disposal
-      modelRef.current = null;
+      if (modelRef.current) {
+        modelRef.current.dispose();
+      }
     };
   }, []);
 
+  // Preprocess image for Tiny YOLOv3
+  const preprocessImage = useCallback((imageElement: HTMLVideoElement) => {
+    const tensor = tf.browser.fromPixels(imageElement)
+      .resizeNearestNeighbor([416, 416]) // Tiny YOLOv3 input size
+      .div(255.0) // Normalize to [0,1]
+      .expandDims(0); // Add batch dimension
+    return tensor;
+  }, []);
 
+  // Post-process Tiny YOLOv3 outputs
+  const postprocessDetections = useCallback((predictions: tf.Tensor, imageWidth: number, imageHeight: number): DetectionBox[] => {
+    const boxes: DetectionBox[] = [];
+    
+    try {
+      const data = predictions.dataSync();
+      
+      // Tiny YOLOv3 outputs: [batch, 13, 13, 255] for 416x416 input
+      // 255 = 3 anchors * (5 + 80 classes)
+      const gridSize = 13;
+      const numAnchors = 3;
+      const numClasses = 80;
+      const anchors = [10, 14, 23, 27, 37, 58]; // Tiny YOLOv3 anchors for 13x13 grid
+      
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          for (let anchor = 0; anchor < numAnchors; anchor++) {
+            const offset = (y * gridSize * numAnchors + x * numAnchors + anchor) * (5 + numClasses);
+            
+            if (offset + 4 >= data.length) continue;
+            
+            // Extract box coordinates (sigmoid activation for tx, ty, objectness)
+            const tx = 1 / (1 + Math.exp(-data[offset])); // sigmoid
+            const ty = 1 / (1 + Math.exp(-data[offset + 1])); // sigmoid
+            const tw = data[offset + 2];
+            const th = data[offset + 3];
+            const objectness = 1 / (1 + Math.exp(-data[offset + 4])); // sigmoid
+            
+            if (objectness > 0.5) {
+              // Find best class
+              let maxClassProb = 0;
+              let bestClass = 0;
+              
+              for (let c = 0; c < numClasses; c++) {
+                const classProb = 1 / (1 + Math.exp(-data[offset + 5 + c])); // sigmoid
+                if (classProb > maxClassProb) {
+                  maxClassProb = classProb;
+                  bestClass = c;
+                }
+              }
+              
+              const confidence = objectness * maxClassProb;
+              
+              if (confidence > 0.3 && bestClass < COCO_CLASSES.length) {
+                const className = COCO_CLASSES[bestClass];
+                
+                // Only keep person and vehicle detections
+                if (className === 'person' || VEHICLE_CLASSES.includes(bestClass)) {
+                  // Calculate actual box coordinates
+                  const centerX = (x + tx) / gridSize * imageWidth;
+                  const centerY = (y + ty) / gridSize * imageHeight;
+                  const width = Math.exp(tw) * anchors[anchor * 2] / 416 * imageWidth;
+                  const height = Math.exp(th) * anchors[anchor * 2 + 1] / 416 * imageHeight;
+                  
+                  boxes.push({
+                    x: Math.max(0, centerX - width / 2),
+                    y: Math.max(0, centerY - height / 2),
+                    width: Math.min(width, imageWidth),
+                    height: Math.min(height, imageHeight),
+                    confidence,
+                    class: className === 'person' ? 'person' : 'vehicle',
+                    classId: bestClass
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in Tiny YOLOv3 post-processing:', error);
+    }
+    
+    // Apply Non-Maximum Suppression to remove duplicate detections
+    return applyNMS(boxes);
+  }, []);
+
+  // Non-Maximum Suppression to remove overlapping detections
+  const applyNMS = useCallback((boxes: DetectionBox[], threshold = 0.5): DetectionBox[] => {
+    // Sort by confidence
+    boxes.sort((a, b) => b.confidence - a.confidence);
+    
+    const keep: DetectionBox[] = [];
+    
+    while (boxes.length > 0) {
+      const current = boxes.shift()!;
+      keep.push(current);
+      
+      boxes = boxes.filter(box => {
+        const iou = calculateIoU(current, box);
+        return iou <= threshold;
+      });
+    }
+    
+    return keep;
+  }, []);
+
+  // Calculate Intersection over Union
+  const calculateIoU = useCallback((box1: DetectionBox, box2: DetectionBox): number => {
+    const x1 = Math.max(box1.x, box2.x);
+    const y1 = Math.max(box1.y, box2.y);
+    const x2 = Math.min(box1.x + box1.width, box2.x + box2.width);
+    const y2 = Math.min(box1.y + box1.height, box2.y + box2.height);
+    
+    if (x2 <= x1 || y2 <= y1) return 0;
+    
+    const intersection = (x2 - x1) * (y2 - y1);
+    const area1 = box1.width * box1.height;
+    const area2 = box2.width * box2.height;
+    const union = area1 + area2 - intersection;
+    
+    return intersection / union;
+  }, []);
 
   // Fallback detection for demonstration when model isn't available
   const fallbackDetection = useCallback((imageWidth: number, imageHeight: number): DetectionBox[] => {
@@ -105,7 +250,7 @@ export function useYoloDetection() {
     return boxes;
   }, []);
 
-  // Detect objects in video frame using COCO-SSD
+  // Detect objects in video frame using Tiny YOLOv3
   const detectObjects = useCallback(async (videoElement: HTMLVideoElement): Promise<DetectionBox[]> => {
     if (!videoElement || videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
       return [];
@@ -118,29 +263,14 @@ export function useYoloDetection() {
       const imageHeight = videoElement.videoHeight;
       
       if (model && isModelLoaded && !error) {
-        // Real AI detection using COCO-SSD
-        const predictions = await model.detect(videoElement);
+        // Real Tiny YOLOv3 detection
+        const preprocessed = preprocessImage(videoElement);
+        const predictions = model.predict(preprocessed) as tf.Tensor;
+        const boxes = postprocessDetections(predictions, imageWidth, imageHeight);
         
-        const boxes: DetectionBox[] = predictions
-          .filter(prediction => {
-            // Only keep person and vehicle detections
-            const className = prediction.class.toLowerCase();
-            return className === 'person' || 
-                   className === 'car' || 
-                   className === 'truck' || 
-                   className === 'bus' || 
-                   className === 'bicycle' || 
-                   className === 'motorcycle';
-          })
-          .map(prediction => ({
-            x: prediction.bbox[0],
-            y: prediction.bbox[1], 
-            width: prediction.bbox[2],
-            height: prediction.bbox[3],
-            confidence: prediction.score,
-            class: prediction.class.toLowerCase() === 'person' ? 'person' : 'vehicle',
-            classId: prediction.class.toLowerCase() === 'person' ? 0 : 2
-          }));
+        // Cleanup tensors
+        preprocessed.dispose();
+        predictions.dispose();
         
         return boxes;
       } else {
@@ -148,13 +278,13 @@ export function useYoloDetection() {
         return fallbackDetection(imageWidth, imageHeight);
       }
     } catch (err) {
-      console.error('Error during object detection:', err);
-      setError('Detection failed. Using fallback mode.');
+      console.error('Error during Tiny YOLOv3 detection:', err);
+      setError('Tiny YOLOv3 detection failed. Using fallback mode.');
       return fallbackDetection(videoElement.videoWidth, videoElement.videoHeight);
     } finally {
       setIsProcessing(false);
     }
-  }, [model, isModelLoaded, error, fallbackDetection]);
+  }, [model, isModelLoaded, error, preprocessImage, postprocessDetections, fallbackDetection]);
 
   return {
     detectObjects,
