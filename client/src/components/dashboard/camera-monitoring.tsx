@@ -10,9 +10,12 @@ import {
   Eye, 
   Maximize,
   Download,
-  Share
+  Share,
+  Brain,
+  AlertCircle
 } from 'lucide-react';
 import { DetectionCounts } from '@/pages/dashboard';
+import { useYoloDetection } from '@/hooks/use-yolo-detection';
 
 interface DetectionBox {
   x: number;
@@ -43,6 +46,9 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   const [detectionBoxes, setDetectionBoxes] = useState<DetectionBox[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string>('Camera 1 - Front Entrance');
   const [currentTimestamp, setCurrentTimestamp] = useState<string>('');
+  
+  // YOLO detection hook
+  const { detectObjects, isModelLoaded, isProcessing, error: yoloError } = useYoloDetection();
 
   const startCamera = useCallback(async (): Promise<void> => {
     try {
@@ -85,49 +91,39 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     setCameraError(null);
   }, []);
 
-  const simulateDetection = useCallback((): void => {
+  const runYoloDetection = useCallback(async (): Promise<void> => {
     if (!videoRef.current) return;
 
     const video = videoRef.current;
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
-    
-    if (videoWidth === 0 || videoHeight === 0) return;
+    if (video.videoWidth === 0 || video.videoHeight === 0) return;
 
-    const numDetections = Math.floor(Math.random() * 5) + 1;
-    const boxes: DetectionBox[] = [];
-    let peopleCount = 0;
-    let vehicleCount = 0;
-
-    for (let i = 0; i < numDetections; i++) {
-      const isPersonDetection = Math.random() > 0.3;
-      const detectionClass: 'person' | 'vehicle' = isPersonDetection ? 'person' : 'vehicle';
+    try {
+      const detectedBoxes = await detectObjects(video);
+      setDetectionBoxes(detectedBoxes);
       
-      if (isPersonDetection) {
-        peopleCount++;
-      } else {
-        vehicleCount++;
-      }
-
-      boxes.push({
-        x: Math.random() * (videoWidth - 100),
-        y: Math.random() * (videoHeight - 100),
-        width: 50 + Math.random() * 100,
-        height: 60 + Math.random() * 120,
-        confidence: 0.6 + Math.random() * 0.4,
-        class: detectionClass
+      // Count detections by type
+      let peopleCount = 0;
+      let vehicleCount = 0;
+      
+      detectedBoxes.forEach(box => {
+        if (box.class === 'person') {
+          peopleCount++;
+        } else if (box.class === 'vehicle') {
+          vehicleCount++;
+        }
       });
+      
+      const newCounts = {
+        total: detectedBoxes.length,
+        people: peopleCount,
+        vehicles: vehicleCount
+      };
+      
+      onDetectionUpdate(newCounts);
+    } catch (error) {
+      console.error('YOLO detection error:', error);
     }
-
-    setDetectionBoxes(boxes);
-    const newCounts = {
-      total: numDetections,
-      people: peopleCount,
-      vehicles: vehicleCount
-    };
-    
-    onDetectionUpdate(newCounts);
-  }, [onDetectionUpdate]);
+  }, [detectObjects, onDetectionUpdate]);
 
   const drawDetections = useCallback((): void => {
     const canvas = canvasRef.current;
@@ -161,7 +157,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       setIsActive(true);
       
       intervalRef.current = setInterval(() => {
-        simulateDetection();
+        runYoloDetection();
         drawDetections();
       }, 1000);
       
@@ -221,6 +217,16 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
               <Activity className="mr-1 h-3 w-3" />
               {isActive ? `${fps} FPS` : "STOPPED"}
             </Badge>
+            <Badge variant={isModelLoaded ? "default" : "secondary"} className="bg-slate-700">
+              <Brain className="mr-1 h-3 w-3" />
+              {isModelLoaded ? "YOLO AI" : "LOADING"}
+            </Badge>
+            {yoloError && (
+              <Badge variant="destructive" className="bg-destructive">
+                <AlertCircle className="mr-1 h-3 w-3" />
+                FALLBACK
+              </Badge>
+            )}
             <select 
               className="bg-slate-700 text-white rounded-lg px-3 py-1 text-sm border border-slate-600"
               value={selectedCamera}
@@ -270,6 +276,15 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             <span className="text-xs text-white">REC</span>
           </div>
 
+          {isProcessing && (
+            <div className="absolute top-20 right-4 glass rounded-lg p-2 backdrop-blur-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-accent rounded-full pulse-animation"></div>
+                <span className="text-xs text-white">AI Processing...</span>
+              </div>
+            </div>
+          )}
+
           <div className="absolute bottom-4 right-4 glass rounded-lg p-2 backdrop-blur-sm">
             <span className="text-xs text-slate-200">{currentTimestamp}</span>
           </div>
@@ -284,31 +299,52 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
           )}
         </div>
         
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Button
-              onClick={handlePlayPause}
-              className={isActive ? "gradient-danger hover:opacity-90" : "gradient-primary hover:opacity-90"}
-            >
-              {isActive ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-              {isActive ? "Stop Monitoring" : "Start Monitoring"}
-            </Button>
-            <Button variant="outline" className="bg-slate-700 hover:bg-slate-600 border-slate-600">
-              <Camera className="mr-2 h-4 w-4" />
-              Snapshot
-            </Button>
-          </div>
+        <div className="space-y-4">
+          {yoloError && (
+            <div className="bg-destructive/20 border border-destructive/50 rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                <span className="text-sm text-destructive">YOLO Model Error: {yoloError}</span>
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Using fallback detection mode for demonstration purposes
+              </p>
+            </div>
+          )}
           
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
-              <Maximize className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
-              <Download className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
-              <Share className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={handlePlayPause}
+                className={isActive ? "gradient-danger hover:opacity-90" : "gradient-primary hover:opacity-90"}
+                disabled={!isModelLoaded && !yoloError}
+              >
+                {isActive ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                {isActive ? "Stop Monitoring" : "Start Monitoring"}
+              </Button>
+              <Button variant="outline" className="bg-slate-700 hover:bg-slate-600 border-slate-600">
+                <Camera className="mr-2 h-4 w-4" />
+                Snapshot
+              </Button>
+              <div className="flex items-center space-x-2 text-xs text-slate-400">
+                <Brain className="h-3 w-3" />
+                <span>
+                  {isModelLoaded ? "YOLO AI Ready" : "Loading AI Model..."}
+                </span>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
+                <Maximize className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
+                <Download className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
+                <Share className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
