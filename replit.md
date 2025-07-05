@@ -43,7 +43,7 @@ SmartGuard is a modern camera surveillance system built with React and Express t
 
 ### Camera System Features
 - **Live Video Streaming**: Real-time camera feed access
-- **YOLO AI Detection**: TensorFlow.js-powered object detection for persons and vehicles
+- **COCO-SSD AI Detection**: TensorFlow.js-powered object detection for persons and vehicles
 - **Real-time Processing**: 1 FPS analysis with confidence scores and bounding boxes
 - **Alert System**: Real-time notifications for security events
 - **Multi-Camera Support**: Grid view for multiple camera feeds
@@ -71,6 +71,7 @@ SmartGuard is a modern camera surveillance system built with React and Express t
 - **@tensorflow/tfjs**: TensorFlow.js for client-side machine learning
 - **@tensorflow/tfjs-backend-webgl**: WebGL backend for GPU acceleration
 - **@tensorflow/tfjs-converter**: Model conversion utilities
+- **@tensorflow-models/coco-ssd**: COCO-SSD object detection model
 
 ### UI Dependencies
 - **@radix-ui/react-***: Comprehensive UI component library
@@ -106,7 +107,7 @@ SmartGuard is a modern camera surveillance system built with React and Express t
 
 Changelog:
 - July 05, 2025. Initial setup
-- July 05, 2025. Integrated YOLO object detection using TensorFlow.js with fallback mode
+- July 05, 2025. Integrated COCO-SSD object detection using TensorFlow.js with fallback mode
 
 ## User Preferences
 

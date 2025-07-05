@@ -219,7 +219,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             </Badge>
             <Badge variant={isModelLoaded ? "default" : "secondary"} className="bg-slate-700">
               <Brain className="mr-1 h-3 w-3" />
-              {isModelLoaded ? "YOLO AI" : "LOADING"}
+              {isModelLoaded ? "AI DETECT" : "LOADING"}
             </Badge>
             {yoloError && (
               <Badge variant="destructive" className="bg-destructive">
@@ -329,7 +329,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
               <div className="flex items-center space-x-2 text-xs text-slate-400">
                 <Brain className="h-3 w-3" />
                 <span>
-                  {isModelLoaded ? "YOLO AI Ready" : "Loading AI Model..."}
+                  {isModelLoaded ? "COCO-SSD AI Ready" : "Loading AI Model..."}
                 </span>
               </div>
             </div>
