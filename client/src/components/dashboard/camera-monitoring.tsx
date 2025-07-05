@@ -139,28 +139,17 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Fonction de génération de couleur HSL en fonction du nom de la classe
-    const getColorForClass = (className: string): string => {
-      const hash = Array.from(className).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const hue = hash % 360; // 0 à 359
-      return `hsl(${hue}, 70%, 50%)`; // Teinte vive et lisible
-    };
-
     detectionBoxes.forEach((box: DetectionBox) => {
-      const color = getColorForClass(box.class);
-
-      // Dessin du cadre
-      ctx.strokeStyle = color;
+      ctx.strokeStyle = box.class === 'person' ? '#10B981' : '#F59E0B';
       ctx.lineWidth = 2;
       ctx.strokeRect(box.x, box.y, box.width, box.height);
 
-      // Dessin du texte
-      ctx.fillStyle = color;
+      ctx.fillStyle = box.class === 'person' ? '#10B981' : '#F59E0B';
       ctx.font = '12px Arial';
       const label = `${box.class} ${Math.round(box.confidence * 100)}%`;
       ctx.fillText(label, box.x, box.y - 5);
     });
-
+  }, [detectionBoxes]);
 
   const handlePlayPause = async (): Promise<void> => {
     if (!isActive) {

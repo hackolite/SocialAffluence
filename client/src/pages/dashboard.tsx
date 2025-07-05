@@ -3,7 +3,7 @@ import Header from "@/components/layout/header";
 import MetricsCards from "@/components/dashboard/metrics-cards";
 import CameraMonitoring from "@/components/dashboard/camera-monitoring";
 import LiveMetrics from "@/components/dashboard/live-metrics";
-import CameraGrid from "@/components/dashboard/camera-grid";
+
 import AnalyticsDashboard from "@/components/dashboard/analytics-dashboard";
 import RecentAlerts from "@/components/dashboard/recent-alerts";
 import { useWebSocket } from "@/hooks/use-websocket";
@@ -178,8 +178,6 @@ export default function Dashboard() {
             <RecentAlerts />
           </div>
         </div>
-        
-        <CameraGrid />
         
         <AnalyticsDashboard timelineData={timelineData} />
       </main>
