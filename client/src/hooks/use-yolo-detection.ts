@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl';
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
 
 interface DetectionBox {
   x: number;
@@ -39,11 +40,11 @@ const COCO_CLASSES = [
 const VEHICLE_CLASSES = [1, 2, 3, 5, 6, 7, 8]; // bicycle, car, motorcycle, bus, train, truck, boat
 
 export function useYoloDetection() {
-  const [model, setModel] = useState<tf.GraphModel | null>(null);
+  const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const modelRef = useRef<tf.GraphModel | null>(null);
+  const modelRef = useRef<cocoSsd.ObjectDetection | null>(null);
 
   // Load SSDLite MobileNetV2 model
   useEffect(() => {
@@ -56,41 +57,19 @@ export function useYoloDetection() {
         await tf.ready();
         console.log('TensorFlow.js backend ready');
         
-        // Try SSDLite MobileNetV2 and other available models
-        const modelUrls = [
-          'https://storage.googleapis.com/tfjs-models/tfjs/ssd_mobilenet_v2/model.json', // SSD MobileNetV2
-          'https://storage.googleapis.com/tfjs-models/tfjs/ssdlite_mobilenet_v2/model.json', // SSDLite MobileNetV2
-          'https://storage.googleapis.com/tfjs-models/tfjs/coco-ssd_v2/model.json' // COCO-SSD v2 fallback
-        ];
+        // Load COCO-SSD with SSDLite MobileNetV2 backbone
+        const loadedModel = await cocoSsd.load({
+          base: 'lite_mobilenet_v2' // This uses SSDLite MobileNetV2
+        });
         
-        let modelLoaded = false;
-        
-        for (const modelUrl of modelUrls) {
-          try {
-            console.log(`Attempting to load SSDLite MobileNetV2 from: ${modelUrl}`);
-            const loadedModel = await tf.loadGraphModel(modelUrl);
-            
-            modelRef.current = loadedModel;
-            setModel(loadedModel);
-            setIsModelLoaded(true);
-            modelLoaded = true;
-            console.log('SSDLite MobileNetV2 model loaded successfully');
-            break;
-          } catch (modelError) {
-            console.warn(`Failed to load from ${modelUrl}:`, modelError);
-            continue;
-          }
-        }
-        
-        if (!modelLoaded) {
-          console.warn('All SSDLite MobileNetV2 URLs failed, using fallback detection');
-          setError('SSDLite MobileNetV2 model unavailable - using fallback mode');
-          setIsModelLoaded(true); // Allow fallback mode
-        }
+        modelRef.current = loadedModel;
+        setModel(loadedModel);
+        setIsModelLoaded(true);
+        console.log('SSDLite MobileNetV2 model loaded successfully');
         
       } catch (err) {
-        console.error('Error loading Tiny YOLOv3 model:', err);
-        setError('Failed to load Tiny YOLOv3 model. Using fallback detection.');
+        console.error('Error loading SSDLite MobileNetV2 model:', err);
+        setError('Failed to load SSDLite MobileNetV2 model. Using fallback detection.');
         setIsModelLoaded(true); // Allow fallback mode
       }
     };
@@ -98,104 +77,12 @@ export function useYoloDetection() {
     loadModel();
 
     return () => {
-      if (modelRef.current) {
-        modelRef.current.dispose();
-      }
+      // COCO-SSD models don't need manual disposal
+      modelRef.current = null;
     };
   }, []);
 
-  // Preprocess image for SSDLite MobileNetV2
-  const preprocessImage = useCallback((imageElement: HTMLVideoElement) => {
-    const tensor = tf.browser.fromPixels(imageElement)
-      .resizeNearestNeighbor([300, 300]) // SSD MobileNet input size
-      .div(255.0) // Normalize to [0,1]
-      .sub(0.5) // Center around 0
-      .mul(2.0) // Scale to [-1, 1]
-      .expandDims(0); // Add batch dimension
-    return tensor;
-  }, []);
-
-  // Post-process SSD outputs
-  const postprocessDetections = useCallback((predictions: tf.Tensor | tf.Tensor[], imageWidth: number, imageHeight: number): DetectionBox[] => {
-    const boxes: DetectionBox[] = [];
-    
-    try {
-      // SSD models typically return an array of tensors: [boxes, classes, scores, num_detections]
-      let boxesTensor: tf.Tensor;
-      let classesTensor: tf.Tensor;
-      let scoresTensor: tf.Tensor;
-      let numDetectionsTensor: tf.Tensor;
-
-      if (Array.isArray(predictions)) {
-        [boxesTensor, classesTensor, scoresTensor, numDetectionsTensor] = predictions;
-      } else {
-        // Single tensor output - assume it's structured detection output
-        const predData = predictions.dataSync();
-        
-        // For simplified processing, create synthetic detections
-        for (let i = 0; i < Math.min(10, predData.length / 6); i++) {
-          const offset = i * 6;
-          const confidence = predData[offset + 4];
-          const classId = Math.round(predData[offset + 5]);
-          
-          if (confidence > 0.3 && classId < COCO_CLASSES.length) {
-            const className = COCO_CLASSES[classId];
-            
-            if (className === 'person' || VEHICLE_CLASSES.includes(classId)) {
-              boxes.push({
-                x: predData[offset] * imageWidth,
-                y: predData[offset + 1] * imageHeight,
-                width: predData[offset + 2] * imageWidth,
-                height: predData[offset + 3] * imageHeight,
-                confidence,
-                class: className === 'person' ? 'person' : 'vehicle',
-                classId
-              });
-            }
-          }
-        }
-        return applyNMS(boxes);
-      }
-
-      // Process proper SSD tensor outputs
-      const boxesData = boxesTensor.dataSync();
-      const classesData = classesTensor.dataSync();
-      const scoresData = scoresTensor.dataSync();
-      const numDetections = numDetectionsTensor.dataSync()[0];
-
-      for (let i = 0; i < Math.min(numDetections, 100); i++) {
-        const score = scoresData[i];
-        const classId = Math.round(classesData[i]);
-        
-        if (score > 0.3 && classId < COCO_CLASSES.length) {
-          const className = COCO_CLASSES[classId];
-          
-          // Only keep person and vehicle detections
-          if (className === 'person' || VEHICLE_CLASSES.includes(classId)) {
-            // SSD boxes are normalized [ymin, xmin, ymax, xmax]
-            const ymin = boxesData[i * 4] * imageHeight;
-            const xmin = boxesData[i * 4 + 1] * imageWidth;
-            const ymax = boxesData[i * 4 + 2] * imageHeight;
-            const xmax = boxesData[i * 4 + 3] * imageWidth;
-            
-            boxes.push({
-              x: Math.max(0, xmin),
-              y: Math.max(0, ymin),
-              width: Math.min(xmax - xmin, imageWidth),
-              height: Math.min(ymax - ymin, imageHeight),
-              confidence: score,
-              class: className === 'person' ? 'person' : 'vehicle',
-              classId
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error in SSD post-processing:', error);
-    }
-    
-    return applyNMS(boxes);
-  }, []);
+  // SSDLite MobileNetV2 preprocessing and postprocessing is handled by COCO-SSD internally
 
   // Non-Maximum Suppression to remove overlapping detections
   const applyNMS = useCallback((boxes: DetectionBox[], threshold = 0.5): DetectionBox[] => {
@@ -270,18 +157,39 @@ export function useYoloDetection() {
       const imageHeight = videoElement.videoHeight;
       
       if (model && isModelLoaded && !error) {
-        // Real SSDLite MobileNetV2 detection
-        const preprocessed = preprocessImage(videoElement);
-        const predictions = model.predict(preprocessed) as tf.Tensor | tf.Tensor[];
-        const boxes = postprocessDetections(predictions, imageWidth, imageHeight);
+        // Real SSDLite MobileNetV2 detection using COCO-SSD API
+        const predictions = await model.detect(videoElement);
         
-        // Cleanup tensors
-        preprocessed.dispose();
-        if (Array.isArray(predictions)) {
-          predictions.forEach(tensor => tensor.dispose());
-        } else {
-          predictions.dispose();
-        }
+        // Convert COCO-SSD predictions to our DetectionBox format
+        const boxes: DetectionBox[] = predictions.map(prediction => {
+          const { bbox, class: className, score } = prediction;
+          const [x, y, width, height] = bbox;
+          
+          // Determine class type
+          let classType: 'person' | 'vehicle' = 'person';
+          let classId = 0;
+          
+          if (className === 'person') {
+            classType = 'person';
+            classId = 0;
+          } else if (VEHICLE_CLASSES.includes(COCO_CLASSES.indexOf(className))) {
+            classType = 'vehicle';
+            classId = COCO_CLASSES.indexOf(className);
+          } else {
+            // Skip non-person, non-vehicle detections
+            return null;
+          }
+          
+          return {
+            x,
+            y,
+            width,
+            height,
+            confidence: score,
+            class: classType,
+            classId
+          };
+        }).filter(box => box !== null) as DetectionBox[];
         
         return boxes;
       } else {
@@ -295,7 +203,7 @@ export function useYoloDetection() {
     } finally {
       setIsProcessing(false);
     }
-  }, [model, isModelLoaded, error, preprocessImage, postprocessDetections, fallbackDetection]);
+  }, [model, isModelLoaded, error, fallbackDetection]);
 
   return {
     detectObjects,
