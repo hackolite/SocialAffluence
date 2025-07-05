@@ -49,6 +49,9 @@ SmartGuard is a modern camera surveillance system built with React and Express t
 - **Multi-Camera Support**: Grid view for multiple camera feeds
 - **Recording Controls**: Start/stop recording functionality
 - **Fallback Detection**: Simulation mode when YOLO model unavailable
+- **Real-time Metrics**: Live counting of people and vehicles detected
+- **Timeline Analytics**: Stacked bar chart showing detections over time
+- **Round Robin History**: 60-minute rolling window with per-minute aggregation
 
 ## Data Flow
 
@@ -107,6 +110,7 @@ SmartGuard is a modern camera surveillance system built with React and Express t
 Changelog:
 - July 05, 2025. Initial setup
 - July 05, 2025. Integrated SSDLite MobileNetV2 object detection with proper preprocessing and NMS
+- July 05, 2025. Added real-time metrics system with timeline analytics and round-robin history
 
 ## User Preferences
 
