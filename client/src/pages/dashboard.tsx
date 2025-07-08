@@ -51,6 +51,9 @@ export default function Dashboard() {
   const [peopleDetected, setPeopleDetected] = useState(0);
   const [vehiclesDetected, setVehiclesDetected] = useState(0);
   
+  // Compteurs cumulatifs par classe (depuis le début)
+  const [cumulativeClassCounts, setCumulativeClassCounts] = useState<Record<string, number>>({});
+  
   // Historique des détections par minute (1 heure = 60 minutes)
   const [timelineData, setTimelineData] = useState<TimelineData[]>(() => {
     const now = Date.now();
@@ -105,11 +108,20 @@ export default function Dashboard() {
   const handleDetectionUpdate = (counts: DetectionCounts) => {
     setDetectionCounts(counts);
     
-    // Incrémenter les compteurs totaux
+    // Incrémenter les compteurs cumulatifs (depuis le début)
     if (counts.total > 0) {
       setTotalDetections(prev => prev + counts.total);
       setPeopleDetected(prev => prev + counts.people);
       setVehiclesDetected(prev => prev + counts.vehicles);
+      
+      // Mettre à jour les compteurs cumulatifs par classe
+      setCumulativeClassCounts(prev => {
+        const newCumulativeCounts = { ...prev };
+        Object.keys(counts.classCounts).forEach(className => {
+          newCumulativeCounts[className] = (newCumulativeCounts[className] || 0) + counts.classCounts[className];
+        });
+        return newCumulativeCounts;
+      });
       
       // Mettre à jour les compteurs de la minute actuelle
       setCurrentMinuteCounts(prev => {
@@ -196,7 +208,10 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <AnalyticsDashboard timelineData={timelineData} />
+        <AnalyticsDashboard 
+          timelineData={timelineData} 
+          cumulativeClassCounts={cumulativeClassCounts}
+        />
       </main>
     </div>
   );

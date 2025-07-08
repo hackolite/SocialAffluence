@@ -8,7 +8,7 @@ interface LiveMetricsProps {
 }
 
 export default function LiveMetrics({ detectionCounts, systemStatus }: LiveMetricsProps) {
-  // Get top 5 detected classes
+  // Get top 5 detected classes from current detection counts
   const topClasses = Object.entries(detectionCounts.classCounts || {})
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);

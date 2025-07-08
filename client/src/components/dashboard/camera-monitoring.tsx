@@ -46,6 +46,8 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   const [detectionBoxes, setDetectionBoxes] = useState<DetectionBox[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string>('Camera');
   const [currentTimestamp, setCurrentTimestamp] = useState<string>('');
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   
   // YOLO detection hook
   const { detectObjects, isModelLoaded, isProcessing, error: yoloError } = useYoloDetection();
@@ -162,15 +164,15 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       
       const color = getClassColor(box.class);
       ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = isFullscreen ? 3 : 2;
       ctx.strokeRect(box.x, box.y, box.width, box.height);
 
       ctx.fillStyle = color;
-      ctx.font = '12px Arial';
+      ctx.font = isFullscreen ? '18px Arial' : '12px Arial';
       const label = `${box.class} ${Math.round(box.confidence * 100)}%`;
       ctx.fillText(label, box.x, box.y - 5);
     });
-  }, [detectionBoxes]);
+  }, [detectionBoxes, isFullscreen]);
 
   const handlePlayPause = async (): Promise<void> => {
     if (!isActive) {
@@ -180,7 +182,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       intervalRef.current = setInterval(() => {
         runYoloDetection();
         drawDetections();
-      }, 1000);
+      }, 500);
       
     } else {
       setIsActive(false);
@@ -192,6 +194,59 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       }
     }
   };
+
+  // Gestion du plein écran
+  const toggleFullscreen = useCallback(async () => {
+    if (!cardRef.current) return;
+    
+    try {
+      if (!isFullscreen) {
+        // Entrer en plein écran
+        if (cardRef.current.requestFullscreen) {
+          await cardRef.current.requestFullscreen();
+        } else if ((cardRef.current as any).webkitRequestFullscreen) {
+          await (cardRef.current as any).webkitRequestFullscreen();
+        } else if ((cardRef.current as any).msRequestFullscreen) {
+          await (cardRef.current as any).msRequestFullscreen();
+        }
+        setIsFullscreen(true);
+      } else {
+        // Sortir du plein écran
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen();
+        }
+        setIsFullscreen(false);
+      }
+    } catch (error) {
+      console.error('Erreur lors du basculement en plein écran:', error);
+    }
+  }, [isFullscreen]);
+
+  // Écouter les changements de plein écran
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).msFullscreenElement
+      );
+      setIsFullscreen(isCurrentlyFullscreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     const updateTimestamp = () => {
@@ -208,7 +263,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     };
 
     updateTimestamp();
-    const timestampInterval = setInterval(updateTimestamp, 1000);
+    const timestampInterval = setInterval(updateTimestamp, 0);
 
     return () => {
       clearInterval(timestampInterval);
@@ -226,12 +281,12 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   }, [detectionBoxes, isActive, drawDetections]);
 
   return (
-    <Card className="glass">
+    <Card ref={cardRef} className={`glass ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center text-white">
             <Camera className="mr-2 h-5 w-5 text-primary" />
-            Real-Time Surveillance
+            Real-Time Affluence Monitoring
           </CardTitle>
           <div className="flex items-center space-x-2">
             <Badge variant={isActive ? "default" : "secondary"} className="bg-slate-700">
@@ -254,14 +309,12 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
               onChange={(e) => setSelectedCamera(e.target.value)}
             >
               <option value="Camera 1 - Front Entrance">Camera 1 - Front Entrance</option>
-              <option value="Camera 2 - Parking Lot">Camera 2 - Parking Lot</option>
-              <option value="Camera 3 - Back Exit">Camera 3 - Back Exit</option>
             </select>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="relative aspect-video bg-slate-800 rounded-lg border border-slate-700 overflow-hidden mb-4">
+        <div className={`relative bg-slate-800 rounded-lg border border-slate-700 overflow-hidden mb-4 ${isFullscreen ? 'aspect-auto h-[calc(100vh-200px)]' : 'aspect-video'}`}>
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
@@ -356,7 +409,13 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             </div>
             
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
+              <Button 
+                onClick={toggleFullscreen}
+                variant="ghost" 
+                size="icon" 
+                className="text-white hover:bg-slate-700"
+                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+              >
                 <Maximize className="h-4 w-4" />
               </Button>
               <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">

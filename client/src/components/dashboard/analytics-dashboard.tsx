@@ -12,9 +12,10 @@ interface TimelineData {
 
 interface AnalyticsDashboardProps {
   timelineData: TimelineData[];
+  cumulativeClassCounts?: Record<string, number>;
 }
 
-export default function AnalyticsDashboard({ timelineData }: AnalyticsDashboardProps) {
+export default function AnalyticsDashboard({ timelineData, cumulativeClassCounts }: AnalyticsDashboardProps) {
   // Préparer les données pour le graphique empilé
   const chartData = timelineData.slice(-60).map((item, index) => ({
     name: format(new Date(item.timestamp), 'HH:mm'),
@@ -27,18 +28,22 @@ export default function AnalyticsDashboard({ timelineData }: AnalyticsDashboardP
   const totalPeople = timelineData.reduce((sum, item) => sum + item.people, 0);
   const totalVehicles = timelineData.reduce((sum, item) => sum + item.vehicles, 0);
   
-  // Calculer les totaux par classe
-  const allClassCounts: Record<string, number> = {};
-  timelineData.forEach(item => {
-    if (item.classCounts) {
-      Object.entries(item.classCounts).forEach(([className, count]) => {
-        allClassCounts[className] = (allClassCounts[className] || 0) + count;
-      });
-    }
-  });
+  // Utiliser les compteurs cumulatifs si disponibles, sinon calculer depuis les données de timeline
+  const finalClassCounts = cumulativeClassCounts || {};
   
-  // Obtenir les 5 classes les plus détectées
-  const topClasses = Object.entries(allClassCounts)
+  // Si pas de compteurs cumulatifs, calculer depuis les données de timeline
+  if (!cumulativeClassCounts) {
+    timelineData.forEach(item => {
+      if (item.classCounts) {
+        Object.entries(item.classCounts).forEach(([className, count]) => {
+          finalClassCounts[className] = (finalClassCounts[className] || 0) + count;
+        });
+      }
+    });
+  }
+  
+  // Obtenir les 5 classes les plus détectées (cumulatives)
+  const topClasses = Object.entries(finalClassCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
@@ -102,7 +107,7 @@ export default function AnalyticsDashboard({ timelineData }: AnalyticsDashboardP
                 <div className="space-y-3">
                   <div className="text-sm text-slate-300 font-medium">Top 5 Classes Détectées:</div>
                   {topClasses.map(([className, count]) => {
-                    const total = Object.values(allClassCounts).reduce((sum, c) => sum + c, 0);
+                    const total = Object.values(finalClassCounts).reduce((sum, c) => sum + c, 0);
                     const percentage = total > 0 ? (count / total) * 100 : 0;
                     
                     // Color scheme for different classes

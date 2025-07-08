@@ -115,6 +115,9 @@ Changelog:
 - July 08, 2025. Enhanced detection system to support all COCO classes (80 classes) instead of just people and vehicles
 - July 08, 2025. Updated UI to show top detected classes with proper counting and color coding
 - July 08, 2025. Improved analytics dashboard with comprehensive class distribution visualization
+- July 08, 2025. Implemented incremental counting system for all detected classes from start (no decrementation)
+- July 08, 2025. Added fullscreen camera functionality with proper UI scaling and cross-browser compatibility
+- July 08, 2025. Fixed active camera count to always show 1 camera active
 
 ## User Preferences
 
