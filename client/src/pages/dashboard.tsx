@@ -12,6 +12,7 @@ export interface DetectionCounts {
   total: number;
   people: number;
   vehicles: number;
+  classCounts: Record<string, number>;
 }
 
 export interface TimelineData {
@@ -19,6 +20,7 @@ export interface TimelineData {
   people: number;
   vehicles: number;
   total: number;
+  classCounts: Record<string, number>;
 }
 
 export interface SystemStatus {
@@ -33,7 +35,8 @@ export default function Dashboard() {
   const [detectionCounts, setDetectionCounts] = useState<DetectionCounts>({
     total: 0,
     people: 0,
-    vehicles: 0
+    vehicles: 0,
+    classCounts: {}
   });
 
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
@@ -58,7 +61,8 @@ export default function Dashboard() {
         timestamp: now - (i * 60 * 1000), // Il y a i minutes
         people: 0,
         vehicles: 0,
-        total: 0
+        total: 0,
+        classCounts: {}
       });
     }
     return data;
@@ -68,7 +72,8 @@ export default function Dashboard() {
   const [currentMinuteCounts, setCurrentMinuteCounts] = useState({
     people: 0,
     vehicles: 0,
-    total: 0
+    total: 0,
+    classCounts: {} as Record<string, number>
   });
 
   // WebSocket connection for real-time updates
@@ -107,11 +112,21 @@ export default function Dashboard() {
       setVehiclesDetected(prev => prev + counts.vehicles);
       
       // Mettre à jour les compteurs de la minute actuelle
-      setCurrentMinuteCounts(prev => ({
-        people: prev.people + counts.people,
-        vehicles: prev.vehicles + counts.vehicles,
-        total: prev.total + counts.total
-      }));
+      setCurrentMinuteCounts(prev => {
+        const newClassCounts = { ...prev.classCounts };
+        
+        // Ajouter les nouvelles détections par classe
+        Object.keys(counts.classCounts).forEach(className => {
+          newClassCounts[className] = (newClassCounts[className] || 0) + counts.classCounts[className];
+        });
+        
+        return {
+          people: prev.people + counts.people,
+          vehicles: prev.vehicles + counts.vehicles,
+          total: prev.total + counts.total,
+          classCounts: newClassCounts
+        };
+      });
     }
   };
 
@@ -127,7 +142,8 @@ export default function Dashboard() {
           timestamp: now,
           people: currentMinuteCounts.people,
           vehicles: currentMinuteCounts.vehicles,
-          total: currentMinuteCounts.total
+          total: currentMinuteCounts.total,
+          classCounts: currentMinuteCounts.classCounts
         });
         
         // Garder seulement les 60 dernières minutes (round robin)
@@ -142,7 +158,8 @@ export default function Dashboard() {
       setCurrentMinuteCounts({
         people: 0,
         vehicles: 0,
-        total: 0
+        total: 0,
+        classCounts: {}
       });
     }, 60000); // Toutes les minutes
     

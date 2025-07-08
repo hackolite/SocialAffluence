@@ -111,6 +111,10 @@ Changelog:
 - July 05, 2025. Initial setup
 - July 05, 2025. Integrated SSDLite MobileNetV2 object detection with proper preprocessing and NMS
 - July 05, 2025. Added real-time metrics system with timeline analytics and round-robin history
+- July 08, 2025. Removed camera grid component from dashboard
+- July 08, 2025. Enhanced detection system to support all COCO classes (80 classes) instead of just people and vehicles
+- July 08, 2025. Updated UI to show top detected classes with proper counting and color coding
+- July 08, 2025. Improved analytics dashboard with comprehensive class distribution visualization
 
 ## User Preferences
 

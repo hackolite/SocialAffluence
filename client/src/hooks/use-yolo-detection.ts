@@ -9,7 +9,7 @@ interface DetectionBox {
   width: number;
   height: number;
   confidence: number;
-  class: 'person' | 'vehicle';
+  class: string;
   classId: number;
 }
 
@@ -127,8 +127,8 @@ export function useYoloDetection() {
     const numDetections = Math.floor(Math.random() * 4) + 1;
     
     for (let i = 0; i < numDetections; i++) {
-      const isPersonDetection = Math.random() > 0.4;
-      const classType = isPersonDetection ? 'person' : 'vehicle';
+      const randomClassIndex = Math.floor(Math.random() * COCO_CLASSES.length);
+      const classType = COCO_CLASSES[randomClassIndex];
       
       boxes.push({
         x: Math.random() * (imageWidth - 100),
@@ -137,7 +137,7 @@ export function useYoloDetection() {
         height: 80 + Math.random() * 100,
         confidence: 0.6 + Math.random() * 0.35,
         class: classType,
-        classId: isPersonDetection ? 0 : 2
+        classId: randomClassIndex
       });
     }
     
@@ -165,20 +165,7 @@ export function useYoloDetection() {
           const { bbox, class: className, score } = prediction;
           const [x, y, width, height] = bbox;
           
-          // Determine class type
-          let classType: 'person' | 'vehicle' = 'person';
-          let classId = 0;
-          
-          if (className === 'person') {
-            classType = 'person';
-            classId = 0;
-          } else if (VEHICLE_CLASSES.includes(COCO_CLASSES.indexOf(className))) {
-            classType = 'vehicle';
-            classId = COCO_CLASSES.indexOf(className);
-          } else {
-            // Skip non-person, non-vehicle detections
-            return null;
-          }
+          const classId = COCO_CLASSES.indexOf(className);
           
           return {
             x,
@@ -186,10 +173,10 @@ export function useYoloDetection() {
             width,
             height,
             confidence: score,
-            class: classType,
+            class: className,
             classId
           };
-        }).filter(box => box !== null) as DetectionBox[];
+        });
         
         return boxes;
       } else {

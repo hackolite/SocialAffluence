@@ -23,7 +23,7 @@ interface DetectionBox {
   width: number;
   height: number;
   confidence: number;
-  class: 'person' | 'vehicle';
+  class: string;
 }
 
 interface CameraMonitoringProps {
@@ -104,11 +104,19 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       // Count detections by type
       let peopleCount = 0;
       let vehicleCount = 0;
+      const classCounts: Record<string, number> = {};
+      
+      // Vehicle classes from COCO dataset
+      const vehicleClasses = ['bicycle', 'car', 'motorcycle', 'bus', 'train', 'truck', 'boat'];
       
       detectedBoxes.forEach(box => {
+        // Count by specific class
+        classCounts[box.class] = (classCounts[box.class] || 0) + 1;
+        
+        // Count people and vehicles for legacy compatibility
         if (box.class === 'person') {
           peopleCount++;
-        } else if (box.class === 'vehicle') {
+        } else if (vehicleClasses.includes(box.class)) {
           vehicleCount++;
         }
       });
@@ -116,7 +124,8 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       const newCounts = {
         total: detectedBoxes.length,
         people: peopleCount,
-        vehicles: vehicleCount
+        vehicles: vehicleCount,
+        classCounts
       };
       
       onDetectionUpdate(newCounts);
@@ -140,11 +149,23 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     detectionBoxes.forEach((box: DetectionBox) => {
-      ctx.strokeStyle = box.class === 'person' ? '#10B981' : '#F59E0B';
+      // Different colors for different classes
+      const getClassColor = (className: string): string => {
+        switch (className) {
+          case 'person': return '#10B981'; // Green
+          case 'car': case 'bus': case 'truck': return '#F59E0B'; // Orange
+          case 'bicycle': case 'motorcycle': return '#3B82F6'; // Blue
+          case 'cat': case 'dog': return '#EF4444'; // Red
+          default: return '#8B5CF6'; // Purple
+        }
+      };
+      
+      const color = getClassColor(box.class);
+      ctx.strokeStyle = color;
       ctx.lineWidth = 2;
       ctx.strokeRect(box.x, box.y, box.width, box.height);
 
-      ctx.fillStyle = box.class === 'person' ? '#10B981' : '#F59E0B';
+      ctx.fillStyle = color;
       ctx.font = '12px Arial';
       const label = `${box.class} ${Math.round(box.confidence * 100)}%`;
       ctx.fillText(label, box.x, box.y - 5);

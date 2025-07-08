@@ -26,6 +26,21 @@ export default function AnalyticsDashboard({ timelineData }: AnalyticsDashboardP
   // Calculer les totaux pour la distribution
   const totalPeople = timelineData.reduce((sum, item) => sum + item.people, 0);
   const totalVehicles = timelineData.reduce((sum, item) => sum + item.vehicles, 0);
+  
+  // Calculer les totaux par classe
+  const allClassCounts: Record<string, number> = {};
+  timelineData.forEach(item => {
+    if (item.classCounts) {
+      Object.entries(item.classCounts).forEach(([className, count]) => {
+        allClassCounts[className] = (allClassCounts[className] || 0) + count;
+      });
+    }
+  });
+  
+  // Obtenir les 5 classes les plus détectées
+  const topClasses = Object.entries(allClassCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
 
   const pieData = [
     { name: 'Personnes', value: totalPeople, color: '#3b82f6' },
@@ -83,56 +98,56 @@ export default function AnalyticsDashboard({ timelineData }: AnalyticsDashboardP
         <CardContent>
           <div className="h-64">
             <div className="space-y-4">
-              <div className="flex justify-center space-x-8">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{totalPeople}</div>
-                  <div className="text-sm text-slate-400 flex items-center">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                    Personnes
-                  </div>
+              {topClasses.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="text-sm text-slate-300 font-medium">Top 5 Classes Détectées:</div>
+                  {topClasses.map(([className, count]) => {
+                    const total = Object.values(allClassCounts).reduce((sum, c) => sum + c, 0);
+                    const percentage = total > 0 ? (count / total) * 100 : 0;
+                    
+                    // Color scheme for different classes
+                    const getClassColor = (className: string): string => {
+                      switch (className) {
+                        case 'person': return 'bg-blue-500';
+                        case 'car': case 'bus': case 'truck': return 'bg-orange-500';
+                        case 'bicycle': case 'motorcycle': return 'bg-green-500';
+                        case 'cat': case 'dog': return 'bg-red-500';
+                        default: return 'bg-purple-500';
+                      }
+                    };
+                    
+                    return (
+                      <div key={className} className="flex items-center space-x-3">
+                        <div className="w-20 text-sm text-slate-400 capitalize">{className}</div>
+                        <div className="flex-1 bg-slate-700 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all duration-500 ${getClassColor(className)}`}
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                        <div className="w-12 text-sm text-slate-400 text-right">{count}</div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{totalVehicles}</div>
-                  <div className="text-sm text-slate-400 flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                    Véhicules
-                  </div>
+              ) : (
+                <div className="text-center text-slate-400 py-8">
+                  <PieChart className="h-12 w-12 mx-auto mb-2" />
+                  <p className="text-sm">Aucune détection pour le moment</p>
                 </div>
-              </div>
+              )}
               
-              <div className="space-y-3">
-                {totalPeople > 0 && (
-                  <div className="flex items-center space-x-3">
-                    <div className="w-24 text-sm text-slate-400">Personnes</div>
-                    <div className="flex-1 bg-slate-700 rounded-full h-2">
-                      <div 
-                        className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${(totalPeople / (totalPeople + totalVehicles)) * 100}%` }}
-                      ></div>
-                    </div>
-                    <div className="w-12 text-sm text-slate-400 text-right">{totalPeople}</div>
+              <div className="border-t border-slate-700 pt-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-blue-500">{totalPeople}</div>
+                    <div className="text-xs text-slate-400">Personnes</div>
                   </div>
-                )}
-                
-                {totalVehicles > 0 && (
-                  <div className="flex items-center space-x-3">
-                    <div className="w-24 text-sm text-slate-400">Véhicules</div>
-                    <div className="flex-1 bg-slate-700 rounded-full h-2">
-                      <div 
-                        className="bg-green-500 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${(totalVehicles / (totalPeople + totalVehicles)) * 100}%` }}
-                      ></div>
-                    </div>
-                    <div className="w-12 text-sm text-slate-400 text-right">{totalVehicles}</div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-orange-500">{totalVehicles}</div>
+                    <div className="text-xs text-slate-400">Véhicules</div>
                   </div>
-                )}
-                
-                {totalPeople === 0 && totalVehicles === 0 && (
-                  <div className="text-center text-slate-400 py-8">
-                    <PieChart className="h-12 w-12 mx-auto mb-2" />
-                    <p className="text-sm">Aucune détection pour le moment</p>
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
