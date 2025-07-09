@@ -161,7 +161,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       ctx.strokeRect(box.x, box.y, box.width, box.height);
 
       ctx.fillStyle = color;
-      ctx.font = isFullscreen ? '100px Arial' : '100px Arial';
+      ctx.font = isFullscreen ? '70px Arial' : '70px Arial';
       const label = `${box.class} ${Math.round(box.confidence * 100)}%`;
       ctx.fillText(label, box.x, box.y - 5);
     });
@@ -279,7 +279,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center text-white">
             <Camera className="mr-2 h-5 w-5 text-primary" />
-            Real-Time Affluence Monitoring
+            Live Affluence Monitoring
           </CardTitle>
           <div className="flex items-center space-x-2">
             <Badge variant={isActive ? "default" : "secondary"} className="bg-slate-700">
@@ -320,23 +320,6 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             ref={canvasRef}
             className="absolute top-0 left-0 w-full h-full pointer-events-none"
           />
-          
-          <div className="absolute top-4 left-4 glass rounded-lg p-3 backdrop-blur-sm">
-            <div className="text-xs space-y-1">
-              <div className="flex items-center space-x-2">
-                <span className="text-slate-300">Detections:</span>
-                <span className="text-white font-semibold">{currentDetections.total}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-secondary">People:</span>
-                <span className="text-white font-semibold">{currentDetections.people}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-accent">Vehicles:</span>
-                <span className="text-white font-semibold">{currentDetections.vehicles}</span>
-              </div>
-            </div>
-          </div>
 
           <div className="absolute top-4 right-4 flex items-center space-x-2 glass rounded-lg p-2 backdrop-blur-sm">
             <div className="w-2 h-2 bg-destructive rounded-full pulse-animation"></div>

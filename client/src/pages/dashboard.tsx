@@ -3,7 +3,6 @@ import Header from "@/components/layout/header";
 import MetricsCards from "@/components/dashboard/metrics-cards";
 import CameraMonitoring from "@/components/dashboard/camera-monitoring";
 import LiveMetrics from "@/components/dashboard/live-metrics";
-
 import AnalyticsDashboard from "@/components/dashboard/analytics-dashboard";
 import RecentAlerts from "@/components/dashboard/recent-alerts";
 import { useWebSocket } from "@/hooks/use-websocket";
@@ -37,7 +36,7 @@ export default function Dashboard() {
   });
 
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
-    camerasActive: 1, // Une seule caméra active
+    camerasActive: 1,
     isRecording: true,
     analysisRate: 1,
     aiDetectionActive: true,
@@ -46,44 +45,35 @@ export default function Dashboard() {
 
   const [totalDetections, setTotalDetections] = useState(0);
   const [peopleDetected, setPeopleDetected] = useState(0);
-  
-  // Compteurs cumulatifs par classe (depuis le début)
   const [cumulativeClassCounts, setCumulativeClassCounts] = useState<Record<string, number>>({});
-  
-  // Historique des détections par minute (1 heure = 60 minutes)
+
   const [timelineData, setTimelineData] = useState<TimelineData[]>(() => {
     const now = Date.now();
-    const data: TimelineData[] = [];
-    // Initialiser avec 60 minutes d'historique
-    for (let i = 59; i >= 0; i--) {
-      data.push({
-        timestamp: now - (i * 60 * 1000), // Il y a i minutes
-        people: 0,
-        total: 0,
-        classCounts: {}
-      });
-    }
-    return data;
+    return Array.from({ length: 60 }, (_, i) => ({
+      timestamp: now - ((59 - i) * 60 * 1000),
+      people: 0,
+      total: 0,
+      classCounts: {}
+    }));
   });
 
-  // Compteurs pour la minute actuelle
   const [currentMinuteCounts, setCurrentMinuteCounts] = useState({
     people: 0,
     total: 0,
     classCounts: {} as Record<string, number>
   });
 
-  // WebSocket connection for real-time updates
   const { socket, isConnected } = useWebSocket();
 
+  // ✅ Modifié ici
   useEffect(() => {
     if (socket) {
       socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          
+
           if (data.type === 'detection_update') {
-            setDetectionCounts(data.counts);
+            handleDetectionUpdate(data.counts);
           } else if (data.type === 'system_status') {
             setSystemStatus(data.status);
           } else if (data.type === 'total_metrics') {
@@ -97,80 +87,64 @@ export default function Dashboard() {
     }
   }, [socket]);
 
-  // Gestion des mises à jour de détection
   const handleDetectionUpdate = (counts: DetectionCounts) => {
     setDetectionCounts(counts);
-    
-    // Incrémenter les compteurs cumulatifs (depuis le début)
+
     if (counts.total > 0) {
       setTotalDetections(prev => prev + counts.total);
       setPeopleDetected(prev => prev + counts.people);
-      
-      // Mettre à jour les compteurs cumulatifs par classe
+
       setCumulativeClassCounts(prev => {
-        const newCumulativeCounts = { ...prev };
-        Object.keys(counts.classCounts).forEach(className => {
-          newCumulativeCounts[className] = (newCumulativeCounts[className] || 0) + counts.classCounts[className];
-        });
-        return newCumulativeCounts;
+        const updated = { ...prev };
+        for (const key in counts.classCounts) {
+          updated[key] = (updated[key] || 0) + counts.classCounts[key];
+        }
+        return updated;
       });
-      
-      // Mettre à jour les compteurs de la minute actuelle
+
       setCurrentMinuteCounts(prev => {
-        const newClassCounts = { ...prev.classCounts };
-        
-        // Ajouter les nouvelles détections par classe
-        Object.keys(counts.classCounts).forEach(className => {
-          newClassCounts[className] = (newClassCounts[className] || 0) + counts.classCounts[className];
-        });
-        
+        const updatedClassCounts = { ...prev.classCounts };
+        for (const key in counts.classCounts) {
+          updatedClassCounts[key] = (updatedClassCounts[key] || 0) + counts.classCounts[key];
+        }
+
         return {
           people: prev.people + counts.people,
           total: prev.total + counts.total,
-          classCounts: newClassCounts
+          classCounts: updatedClassCounts
         };
       });
     }
   };
 
-  // Mise à jour de l'historique toutes les minutes
   useEffect(() => {
     const interval = setInterval(() => {
       setTimelineData(prev => {
         const now = Date.now();
-        const newData = [...prev];
-        
-        // Ajouter les données de la minute actuelle
-        newData.push({
+        const newData = [...prev, {
           timestamp: now,
           people: currentMinuteCounts.people,
           total: currentMinuteCounts.total,
           classCounts: currentMinuteCounts.classCounts
-        });
-        
-        // Garder seulement les 60 dernières minutes (round robin)
-        if (newData.length > 60) {
-          newData.shift();
-        }
-        
+        }];
+
+        if (newData.length > 60) newData.shift();
         return newData;
       });
-      
-      // Réinitialiser les compteurs pour la nouvelle minute
+
       setCurrentMinuteCounts({
         people: 0,
         total: 0,
         classCounts: {}
       });
-    }, 60000); // Toutes les minutes
-    
+    }, 60000);
+
     return () => clearInterval(interval);
   }, [currentMinuteCounts]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800">
       <Header />
-      
       <main className="container mx-auto px-4 py-6">
         <MetricsCards 
           activeCameras={systemStatus.camerasActive}
@@ -178,7 +152,7 @@ export default function Dashboard() {
           peopleDetected={peopleDetected}
           isConnected={isConnected}
         />
-        
+
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-2">
             <CameraMonitoring 
@@ -186,7 +160,6 @@ export default function Dashboard() {
               currentDetections={detectionCounts}
             />
           </div>
-          
           <div className="space-y-4">
             <LiveMetrics 
               detectionCounts={detectionCounts}
@@ -195,7 +168,7 @@ export default function Dashboard() {
             <RecentAlerts />
           </div>
         </div>
-        
+
         <AnalyticsDashboard 
           timelineData={timelineData} 
           cumulativeClassCounts={cumulativeClassCounts}
