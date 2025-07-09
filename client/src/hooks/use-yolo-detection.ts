@@ -94,7 +94,7 @@ export function useYoloDetection() {
   // SSDLite MobileNetV2 preprocessing and postprocessing is handled by COCO-SSD internally
 
   // Non-Maximum Suppression to remove overlapping detections
-  const applyNMS = useCallback((boxes: DetectionBox[], threshold = 0.5): DetectionBox[] => {
+  const applyNMS = useCallback((boxes: DetectionBox[], threshold = 0.3): DetectionBox[] => {
     // Sort by confidence
     boxes.sort((a, b) => b.confidence - a.confidence);
     
