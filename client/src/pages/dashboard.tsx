@@ -11,14 +11,12 @@ import { useWebSocket } from "@/hooks/use-websocket";
 export interface DetectionCounts {
   total: number;
   people: number;
-  vehicles: number;
   classCounts: Record<string, number>;
 }
 
 export interface TimelineData {
   timestamp: number;
   people: number;
-  vehicles: number;
   total: number;
   classCounts: Record<string, number>;
 }
@@ -35,7 +33,6 @@ export default function Dashboard() {
   const [detectionCounts, setDetectionCounts] = useState<DetectionCounts>({
     total: 0,
     people: 0,
-    vehicles: 0,
     classCounts: {}
   });
 
@@ -49,7 +46,6 @@ export default function Dashboard() {
 
   const [totalDetections, setTotalDetections] = useState(0);
   const [peopleDetected, setPeopleDetected] = useState(0);
-  const [vehiclesDetected, setVehiclesDetected] = useState(0);
   
   // Compteurs cumulatifs par classe (depuis le début)
   const [cumulativeClassCounts, setCumulativeClassCounts] = useState<Record<string, number>>({});
@@ -63,7 +59,6 @@ export default function Dashboard() {
       data.push({
         timestamp: now - (i * 60 * 1000), // Il y a i minutes
         people: 0,
-        vehicles: 0,
         total: 0,
         classCounts: {}
       });
@@ -74,7 +69,6 @@ export default function Dashboard() {
   // Compteurs pour la minute actuelle
   const [currentMinuteCounts, setCurrentMinuteCounts] = useState({
     people: 0,
-    vehicles: 0,
     total: 0,
     classCounts: {} as Record<string, number>
   });
@@ -95,7 +89,6 @@ export default function Dashboard() {
           } else if (data.type === 'total_metrics') {
             setTotalDetections(data.total);
             setPeopleDetected(data.people);
-            setVehiclesDetected(data.vehicles);
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
@@ -112,7 +105,6 @@ export default function Dashboard() {
     if (counts.total > 0) {
       setTotalDetections(prev => prev + counts.total);
       setPeopleDetected(prev => prev + counts.people);
-      setVehiclesDetected(prev => prev + counts.vehicles);
       
       // Mettre à jour les compteurs cumulatifs par classe
       setCumulativeClassCounts(prev => {
@@ -134,7 +126,6 @@ export default function Dashboard() {
         
         return {
           people: prev.people + counts.people,
-          vehicles: prev.vehicles + counts.vehicles,
           total: prev.total + counts.total,
           classCounts: newClassCounts
         };
@@ -153,7 +144,6 @@ export default function Dashboard() {
         newData.push({
           timestamp: now,
           people: currentMinuteCounts.people,
-          vehicles: currentMinuteCounts.vehicles,
           total: currentMinuteCounts.total,
           classCounts: currentMinuteCounts.classCounts
         });
@@ -169,7 +159,6 @@ export default function Dashboard() {
       // Réinitialiser les compteurs pour la nouvelle minute
       setCurrentMinuteCounts({
         people: 0,
-        vehicles: 0,
         total: 0,
         classCounts: {}
       });
@@ -187,7 +176,6 @@ export default function Dashboard() {
           activeCameras={systemStatus.camerasActive}
           totalDetections={totalDetections}
           peopleDetected={peopleDetected}
-          vehiclesDetected={vehiclesDetected}
           isConnected={isConnected}
         />
         

@@ -6,7 +6,6 @@ import { format } from "date-fns";
 interface TimelineData {
   timestamp: number;
   people: number;
-  vehicles: number;
   total: number;
 }
 
@@ -20,13 +19,11 @@ export default function AnalyticsDashboard({ timelineData, cumulativeClassCounts
   const chartData = timelineData.slice(-60).map((item, index) => ({
     name: format(new Date(item.timestamp), 'HH:mm'),
     people: item.people,
-    vehicles: item.vehicles,
     total: item.total
   }));
 
   // Calculer les totaux pour la distribution
   const totalPeople = timelineData.reduce((sum, item) => sum + item.people, 0);
-  const totalVehicles = timelineData.reduce((sum, item) => sum + item.vehicles, 0);
   
   // Utiliser les compteurs cumulatifs si disponibles, sinon calculer depuis les données de timeline
   const finalClassCounts = cumulativeClassCounts || {};
@@ -48,8 +45,7 @@ export default function AnalyticsDashboard({ timelineData, cumulativeClassCounts
     .slice(0, 5);
 
   const pieData = [
-    { name: 'Personnes', value: totalPeople, color: '#3b82f6' },
-    { name: 'Véhicules', value: totalVehicles, color: '#10b981' }
+    { name: 'Personnes', value: totalPeople, color: '#3b82f6' }
   ];
 
   return (
@@ -85,8 +81,8 @@ export default function AnalyticsDashboard({ timelineData, cumulativeClassCounts
                     color: '#fff'
                   }}
                 />
-                <Bar dataKey="people" stackId="a" fill="#3b82f6" name="Personnes" />
-                <Bar dataKey="vehicles" stackId="a" fill="#10b981" name="Véhicules" />
+                <Bar dataKey="people" fill="#3b82f6" name="Personnes" />
+                <Bar dataKey="total" fill="#10b981" name="Total" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -143,15 +139,9 @@ export default function AnalyticsDashboard({ timelineData, cumulativeClassCounts
               )}
               
               <div className="border-t border-slate-700 pt-3">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-blue-500">{totalPeople}</div>
-                    <div className="text-xs text-slate-400">Personnes</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-orange-500">{totalVehicles}</div>
-                    <div className="text-xs text-slate-400">Véhicules</div>
-                  </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-blue-500">{totalPeople}</div>
+                  <div className="text-xs text-slate-400">Personnes détectées</div>
                 </div>
               </div>
             </div>

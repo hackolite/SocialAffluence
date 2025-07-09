@@ -43,13 +43,13 @@ SmartGuard is a modern camera surveillance system built with React and Express t
 
 ### Camera System Features
 - **Live Video Streaming**: Real-time camera feed access
-- **SSDLite MobileNetV2 AI Detection**: TensorFlow.js-powered object detection for persons and vehicles
+- **SSDLite MobileNetV2 AI Detection**: TensorFlow.js-powered object detection for persons and all COCO classes
 - **Real-time Processing**: 1 FPS analysis with confidence scores and bounding boxes
 - **Alert System**: Real-time notifications for security events
 - **Multi-Camera Support**: Grid view for multiple camera feeds
 - **Recording Controls**: Start/stop recording functionality
 - **Fallback Detection**: Simulation mode when YOLO model unavailable
-- **Real-time Metrics**: Live counting of people and vehicles detected
+- **Real-time Metrics**: Live counting of people and all detected object classes
 - **Timeline Analytics**: Stacked bar chart showing detections over time
 - **Round Robin History**: 60-minute rolling window with per-minute aggregation
 
@@ -118,6 +118,8 @@ Changelog:
 - July 08, 2025. Implemented incremental counting system for all detected classes from start (no decrementation)
 - July 08, 2025. Added fullscreen camera functionality with proper UI scaling and cross-browser compatibility
 - July 08, 2025. Fixed active camera count to always show 1 camera active
+- July 09, 2025. Removed vehicle concept from detection system, now focuses on person detection and all other COCO classes
+- July 09, 2025. Updated UI to remove vehicle-specific metrics and display general class-based detection statistics
 
 ## User Preferences
 

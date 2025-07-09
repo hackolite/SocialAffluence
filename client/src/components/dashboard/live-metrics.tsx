@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Activity, Users, Car, Server } from "lucide-react";
+import { BarChart3, Activity, Users, Server } from "lucide-react";
 import { DetectionCounts, SystemStatus } from "@/pages/dashboard";
 
 interface LiveMetricsProps {
@@ -47,19 +47,12 @@ export default function LiveMetrics({ detectionCounts, systemStatus }: LiveMetri
             </div>
           )}
           
-          <div className="border-t border-slate-700 pt-3 grid grid-cols-2 gap-3">
+          <div className="border-t border-slate-700 pt-3">
             <div className="text-center">
               <div className="text-xl font-bold text-secondary mb-1">{detectionCounts.people}</div>
               <div className="text-xs text-slate-400 flex items-center justify-center">
                 <Users className="w-3 h-3 mr-1" />
-                People
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-accent mb-1">{detectionCounts.vehicles}</div>
-              <div className="text-xs text-slate-400 flex items-center justify-center">
-                <Car className="w-3 h-3 mr-1" />
-                Vehicles
+                People Detected
               </div>
             </div>
           </div>

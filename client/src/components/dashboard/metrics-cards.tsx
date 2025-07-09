@@ -1,11 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Camera, Activity, Users, Car } from "lucide-react";
+import { Camera, Activity, Users } from "lucide-react";
 
 interface MetricsCardsProps {
   activeCameras: number;
   totalDetections: number;
   peopleDetected: number;
-  vehiclesDetected: number;
   isConnected: boolean;
 }
 
@@ -13,11 +12,10 @@ export default function MetricsCards({
   activeCameras, 
   totalDetections, 
   peopleDetected, 
-  vehiclesDetected,
   isConnected 
 }: MetricsCardsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <Card className="glass metric-card">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -72,22 +70,7 @@ export default function MetricsCards({
         </CardContent>
       </Card>
 
-      <Card className="glass metric-card">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-slate-400">Vehicles Detected</p>
-              <p className="text-2xl font-bold text-white">{vehiclesDetected}</p>
-            </div>
-            <div className="w-12 h-12 bg-gradient-to-br from-accent to-orange-600 rounded-lg flex items-center justify-center">
-              <Car className="h-6 w-6 text-white" />
-            </div>
-          </div>
-          <div className="mt-4 flex items-center">
-            <span className="text-xs text-accent">Peak: 23 at 16:45</span>
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }

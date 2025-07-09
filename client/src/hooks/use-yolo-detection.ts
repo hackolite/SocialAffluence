@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl';
+import '@tensorflow/tfjs-backend-cpu';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 
 interface DetectionBox {
@@ -36,8 +37,8 @@ const COCO_CLASSES = [
   'toothbrush'
 ];
 
-// Vehicle class IDs in COCO dataset
-const VEHICLE_CLASSES = [1, 2, 3, 5, 6, 7, 8]; // bicycle, car, motorcycle, bus, train, truck, boat
+// Person class ID in COCO dataset
+const PERSON_CLASS = 0; // person
 
 export function useYoloDetection() {
   const [model, setModel] = useState<cocoSsd.ObjectDetection | null>(null);
@@ -53,9 +54,17 @@ export function useYoloDetection() {
         console.log('Loading SSDLite MobileNetV2 model...');
         setError(null);
         
-        // Initialize TensorFlow.js backend
-        await tf.ready();
-        console.log('TensorFlow.js backend ready');
+        // Initialize TensorFlow.js backend with fallback
+        try {
+          await tf.setBackend('webgl');
+          await tf.ready();
+          console.log('TensorFlow.js WebGL backend ready');
+        } catch (webglError) {
+          console.warn('WebGL backend failed, falling back to CPU:', webglError);
+          await tf.setBackend('cpu');
+          await tf.ready();
+          console.log('TensorFlow.js CPU backend ready');
+        }
         
         // Load COCO-SSD with SSDLite MobileNetV2 backbone
         const loadedModel = await cocoSsd.load({

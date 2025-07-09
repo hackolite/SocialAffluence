@@ -105,28 +105,21 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       
       // Count detections by type
       let peopleCount = 0;
-      let vehicleCount = 0;
       const classCounts: Record<string, number> = {};
-      
-      // Vehicle classes from COCO dataset
-      const vehicleClasses = ['bicycle', 'car', 'motorcycle', 'bus', 'train', 'truck', 'boat'];
       
       detectedBoxes.forEach(box => {
         // Count by specific class
         classCounts[box.class] = (classCounts[box.class] || 0) + 1;
         
-        // Count people and vehicles for legacy compatibility
+        // Count people specifically
         if (box.class === 'person') {
           peopleCount++;
-        } else if (vehicleClasses.includes(box.class)) {
-          vehicleCount++;
         }
       });
       
       const newCounts = {
         total: detectedBoxes.length,
         people: peopleCount,
-        vehicles: vehicleCount,
         classCounts
       };
       
@@ -164,11 +157,11 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       
       const color = getClassColor(box.class);
       ctx.strokeStyle = color;
-      ctx.lineWidth = isFullscreen ? 3 : 2;
+      ctx.lineWidth = isFullscreen ? 30 : 20;
       ctx.strokeRect(box.x, box.y, box.width, box.height);
 
       ctx.fillStyle = color;
-      ctx.font = isFullscreen ? '18px Arial' : '12px Arial';
+      ctx.font = isFullscreen ? '100px Arial' : '100px Arial';
       const label = `${box.class} ${Math.round(box.confidence * 100)}%`;
       ctx.fillText(label, box.x, box.y - 5);
     });
