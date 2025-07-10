@@ -21,7 +21,7 @@ export default function MetricsCards({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-400">Active Cameras</p>
-              <p className="text-2xl font-bold text-white">1</p>
+              <p className="text-2xl font-bold text-white">{activeCameras}</p>
             </div>
             <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
               <Camera className="h-6 w-6 text-white" />
