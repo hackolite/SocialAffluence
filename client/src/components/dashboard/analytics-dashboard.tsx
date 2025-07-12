@@ -51,7 +51,7 @@ export default function AnalyticsDashboard({ timelineData, cumulativeClassCounts
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-            Détections empilées (connus / inconnus)
+            Stack détection
           </CardTitle>
         </CardHeader>
         <CardContent>
