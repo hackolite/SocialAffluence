@@ -62,16 +62,17 @@
     background: rgba(30, 41, 59, 0.8);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(148, 163, 184, 0.2);
+    @apply p-4 rounded-xl;
   }
-  
+
   .gradient-primary {
     background: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(221, 83%, 53%) 100%);
   }
-  
+
   .gradient-secondary {
     background: linear-gradient(135deg, hsl(162, 76%, 36%) 0%, hsl(158, 64%, 52%) 100%);
   }
-  
+
   .gradient-danger {
     background: linear-gradient(135deg, hsl(0, 72%, 51%) 0%, hsl(0, 84%, 60%) 100%);
   }
@@ -99,6 +100,7 @@
   }
 
   .metric-card {
+    @apply p-4 rounded-lg bg-card text-card-foreground shadow-md;
     transition: all 0.3s ease;
   }
 
@@ -134,5 +136,37 @@
     border-radius: 4px;
     font-size: 12px;
     font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* -------------------- Mobile enhancements -------------------- */
+
+  @media (max-width: 640px) {
+    .glass {
+      @apply p-3 rounded-lg;
+    }
+
+    .metric-card {
+      @apply p-3 text-sm;
+    }
+
+    .detection-label {
+      font-size: 10px;
+      padding: 2px 6px;
+    }
+
+    .status-indicator {
+      @apply w-1.5 h-1.5 mr-1;
+    }
+
+    .detection-box {
+      border-width: 1.5px;
+    }
+
+    .gradient-primary,
+    .gradient-secondary,
+    .gradient-danger {
+      background-size: 150% 150%;
+    }
   }
 }
