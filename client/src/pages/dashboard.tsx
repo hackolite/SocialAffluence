@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import Header from "@/components/layout/header";
 import MetricsCards from "@/components/dashboard/metrics-cards";
@@ -49,6 +51,7 @@ export default function Dashboard() {
   const [cumulativeClassCounts, setCumulativeClassCounts] = useState<
     Record<string, number>
   >({});
+
   const [timelineData, setTimelineData] = useState<TimelineData[]>([]);
   const [currentMinuteCounts, setCurrentMinuteCounts] = useState({
     people: 0,
@@ -57,13 +60,14 @@ export default function Dashboard() {
   });
 
   const [minuteStart, setMinuteStart] = useState<number>(
-    startOfMinute(new Date()).getTime(),
+    startOfMinute(new Date()).getTime()
   );
 
   const { socket, isConnected } = useWebSocket();
 
   useEffect(() => {
     if (!socket) return;
+
     const handleMessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
@@ -79,6 +83,7 @@ export default function Dashboard() {
         console.error("WebSocket message parsing error:", error);
       }
     };
+
     socket.addEventListener("message", handleMessage);
     return () => socket.removeEventListener("message", handleMessage);
   }, [socket]);
@@ -87,8 +92,6 @@ export default function Dashboard() {
     if (counts.total <= 0) return;
 
     setDetectionCounts(counts);
-
-    // Mise à jour des totaux globaux
     setTotalDetections((prev) => prev + counts.total);
     setPeopleDetected((prev) => prev + counts.people);
 
@@ -101,12 +104,12 @@ export default function Dashboard() {
       return updated;
     });
 
-    // Ajout aux compteurs de la minute en cours
     setCurrentMinuteCounts((prev) => {
       const updatedClassCounts = { ...prev.classCounts };
       for (const className in counts.classCounts) {
         updatedClassCounts[className] =
-          (updatedClassCounts[className] || 0) + counts.classCounts[className];
+          (updatedClassCounts[className] || 0) +
+          counts.classCounts[className];
       }
       return {
         people: prev.people + counts.people,
@@ -116,14 +119,12 @@ export default function Dashboard() {
     });
   };
 
-  // Mise à jour toutes les minutes
   useEffect(() => {
     const now = new Date();
     const nextMinute = addMinutes(startOfMinute(now), 1);
     const delay = nextMinute.getTime() - now.getTime();
 
     const timeout = setTimeout(() => {
-      // Ajouter la minute écoulée au timelineData
       setTimelineData((prev) => [
         ...prev,
         {
@@ -134,7 +135,6 @@ export default function Dashboard() {
         },
       ]);
 
-      // Réinitialiser les compteurs
       setCurrentMinuteCounts({ people: 0, total: 0, classCounts: {} });
       setMinuteStart(startOfMinute(new Date()).getTime());
     }, delay);
