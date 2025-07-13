@@ -11,7 +11,7 @@ export default function Header() {
               <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
                 <ShieldCheck className="h-5 w-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-white">SmartGuard</h1>
+              <h1 className="text-xl font-bold text-white">SocialAffluence</h1>
             </div>
             <nav className="hidden md:flex space-x-6">
               <a href="#" className="text-white hover:text-primary transition-colors">
