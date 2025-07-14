@@ -92,7 +92,7 @@ export default function AnalyticsDashboard({
 
   // Trier les classes par nombre décroissant
   const allClassesSorted = Object.entries(finalClassCounts).sort(
-    (a, b) => b[1] - a[1]
+    (a, b) => b[1] - a[1],
   );
 
   // Total personnes détectées (somme de people sur timeline)
@@ -101,7 +101,7 @@ export default function AnalyticsDashboard({
   // Total détections toutes classes cumulées
   const totalDetections = Object.values(finalClassCounts).reduce(
     (a, b) => a + b,
-    0
+    0,
   );
 
   return (
