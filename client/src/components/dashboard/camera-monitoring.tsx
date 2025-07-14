@@ -16,8 +16,9 @@ export default function CameraMonitoring({
   currentDetections,
 }: CameraMonitoringProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Initialise la webcam
+  // Lance la webcam
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -37,31 +38,33 @@ export default function CameraMonitoring({
     startWebcam();
   }, []);
 
-  // Observe les changements de taille (notamment après un fullscreen)
+  // ResizeObserver : ajuste la taille du <video> si le conteneur change
   useEffect(() => {
+    const container = containerRef.current;
     const video = videoRef.current;
-    if (!video || !video.parentElement) return;
+    if (!container || !video) return;
 
     const observer = new ResizeObserver(() => {
       video.style.width = "100%";
       video.style.height = "auto";
     });
 
-    observer.observe(video.parentElement);
+    observer.observe(container);
 
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="w-full h-auto rounded-lg overflow-hidden bg-black">
+    <div
+      ref={containerRef}
+      className="w-full aspect-video bg-black rounded-lg overflow-hidden"
+    >
       <video
         ref={videoRef}
         autoPlay
         playsInline
         muted
-        className="w-full h-auto object-contain"
+        className="w-full h-full object-contain"
       />
     </div>
   );
