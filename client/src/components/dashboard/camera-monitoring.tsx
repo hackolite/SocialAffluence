@@ -18,17 +18,34 @@ export default function CameraMonitoring({
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Lance la webcam
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const startWebcam = async () => {
       try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter((d) => d.kind === "videoinput");
+
+        // On cherche une caméra "back" (typiquement sur mobile)
+        let preferredDevice = videoDevices.find((d) =>
+          d.label.toLowerCase().includes("back")
+        );
+
+        if (!preferredDevice && videoDevices.length > 0) {
+          preferredDevice = videoDevices[0]; // Fallback: première caméra
+        }
+
+        if (!preferredDevice) {
+          console.error("Aucune caméra vidéo disponible.");
+          return;
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: { deviceId: preferredDevice.deviceId },
           audio: false,
         });
+
         video.srcObject = stream;
       } catch (error) {
         console.error("Erreur d'accès à la webcam :", error);
@@ -38,7 +55,6 @@ export default function CameraMonitoring({
     startWebcam();
   }, []);
 
-  // ResizeObserver : ajuste la taille du <video> si le conteneur change
   useEffect(() => {
     const container = containerRef.current;
     const video = videoRef.current;
@@ -50,7 +66,6 @@ export default function CameraMonitoring({
     });
 
     observer.observe(container);
-
     return () => observer.disconnect();
   }, []);
 
