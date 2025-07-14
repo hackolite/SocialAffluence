@@ -44,12 +44,11 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [fps] = useState<number>(1);
   const [detectionBoxes, setDetectionBoxes] = useState<DetectionBox[]>([]);
-  const [selectedCamera, setSelectedCamera] = useState<string>('Camera');
+  const [selectedCamera, setSelectedCamera] = useState<string>('Camera 1 - Front Entrance');
   const [currentTimestamp, setCurrentTimestamp] = useState<string>('');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  
-  // YOLO detection hook
+
   const { detectObjects, isModelLoaded, isProcessing, error: yoloError } = useYoloDetection();
 
   const startCamera = useCallback(async (): Promise<void> => {
@@ -61,7 +60,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
           facingMode: 'environment'
         }
       });
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
@@ -85,11 +84,11 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       });
       streamRef.current = null;
     }
-    
+
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-    
+
     setCameraError(null);
   }, []);
 
@@ -102,27 +101,21 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     try {
       const detectedBoxes = await detectObjects(video);
       setDetectionBoxes(detectedBoxes);
-      
-      // Count detections by type
+
       let peopleCount = 0;
       const classCounts: Record<string, number> = {};
-      
+
       detectedBoxes.forEach(box => {
-        // Count by specific class
         classCounts[box.class] = (classCounts[box.class] || 0) + 1;
-        
-        // Count people specifically
-        if (box.class === 'person') {
-          peopleCount++;
-        }
+        if (box.class === 'person') peopleCount++;
       });
-      
+
       const newCounts = {
         total: detectedBoxes.length,
         people: peopleCount,
         classCounts
       };
-      
+
       onDetectionUpdate(newCounts);
     } catch (error) {
       console.error('YOLO detection error:', error);
@@ -132,7 +125,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   const drawDetections = useCallback((): void => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    
+
     if (!canvas || !video) return;
 
     const ctx = canvas.getContext('2d');
@@ -144,17 +137,16 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     detectionBoxes.forEach((box: DetectionBox) => {
-      // Different colors for different classes
       const getClassColor = (className: string): string => {
         switch (className) {
-          case 'person': return '#10B981'; // Green
-          case 'car': case 'bus': case 'truck': return '#F59E0B'; // Orange
-          case 'bicycle': case 'motorcycle': return '#3B82F6'; // Blue
-          case 'cat': case 'dog': return '#EF4444'; // Red
-          default: return '#8B5CF6'; // Purple
+          case 'person': return '#10B981';
+          case 'car': case 'bus': case 'truck': return '#F59E0B';
+          case 'bicycle': case 'motorcycle': return '#3B82F6';
+          case 'cat': case 'dog': return '#EF4444';
+          default: return '#8B5CF6';
         }
       };
-      
+
       const color = getClassColor(box.class);
       ctx.strokeStyle = color;
       ctx.lineWidth = isFullscreen ? 30 : 20;
@@ -171,30 +163,22 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     if (!isActive) {
       await startCamera();
       setIsActive(true);
-      
       intervalRef.current = setInterval(() => {
         runYoloDetection();
         drawDetections();
       }, 500);
-      
     } else {
       setIsActive(false);
       stopCamera();
-      
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     }
   };
 
-  // Gestion du plein écran
   const toggleFullscreen = useCallback(async () => {
     if (!cardRef.current) return;
-    
+
     try {
       if (!isFullscreen) {
-        // Entrer en plein écran
         if (cardRef.current.requestFullscreen) {
           await cardRef.current.requestFullscreen();
         } else if ((cardRef.current as any).webkitRequestFullscreen) {
@@ -204,7 +188,6 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
         }
         setIsFullscreen(true);
       } else {
-        // Sortir du plein écran
         if (document.exitFullscreen) {
           await document.exitFullscreen();
         } else if ((document as any).webkitExitFullscreen) {
@@ -219,7 +202,6 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     }
   }, [isFullscreen]);
 
-  // Écouter les changements de plein écran
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isCurrentlyFullscreen = !!(
@@ -256,21 +238,17 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     };
 
     updateTimestamp();
-    const timestampInterval = setInterval(updateTimestamp, 0);
+    const timestampInterval = setInterval(updateTimestamp, 1000);
 
     return () => {
       clearInterval(timestampInterval);
       stopCamera();
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [stopCamera]);
 
   useEffect(() => {
-    if (isActive) {
-      drawDetections();
-    }
+    if (isActive) drawDetections();
   }, [detectionBoxes, isActive, drawDetections]);
 
   return (
@@ -314,94 +292,18 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             autoPlay
             muted
             playsInline
-            style={{ display: cameraError ? 'none' : 'block' }}
           />
-          <canvas
-            ref={canvasRef}
-            className="absolute top-0 left-0 w-full h-full pointer-events-none"
-          />
-
-
-          <div className="absolute top-4 right-4 flex items-center space-x-2 glass rounded-lg p-2 backdrop-blur-sm">
-            <div className="w-2 h-2 bg-destructive rounded-full pulse-animation"></div>
-            <span className="text-xs text-white">REC</span>
-          </div>
-
-          {isProcessing && (
-            <div className="absolute top-20 right-4 glass rounded-lg p-2 backdrop-blur-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-accent rounded-full pulse-animation"></div>
-                <span className="text-xs text-white">AI Processing...</span>
-              </div>
-            </div>
-          )}
-
-          <div className="absolute bottom-4 right-4 glass rounded-lg p-2 backdrop-blur-sm">
-            <span className="text-xs text-slate-200">{currentTimestamp}</span>
-          </div>
-
-          {cameraError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white">
-              <div className="text-center">
-                <Eye className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">{cameraError}</p>
-              </div>
-            </div>
-          )}
+          <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" />
         </div>
-        
-        <div className="space-y-4">
-          {yoloError && (
-            <div className="bg-destructive/20 border border-destructive/50 rounded-lg p-3">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="h-4 w-4 text-destructive" />
-                <span className="text-sm text-destructive">SSDLite MobileNetV2 Error: {yoloError}</span>
-              </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Using fallback detection mode for demonstration purposes
-              </p>
-            </div>
-          )}
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Button
-                onClick={handlePlayPause}
-                className={isActive ? "gradient-danger hover:opacity-90" : "gradient-primary hover:opacity-90"}
-                disabled={!isModelLoaded && !yoloError}
-              >
-                {isActive ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-                {isActive ? "Stop Monitoring" : "Start Monitoring"}
-              </Button>
-              <Button variant="outline" className="bg-slate-700 hover:bg-slate-600 border-slate-600">
-                <Camera className="mr-2 h-4 w-4" />
-                Snapshot
-              </Button>
-              <div className="flex items-center space-x-2 text-xs text-slate-400">
-                <Brain className="h-3 w-3" />
-                <span>
-                  {isModelLoaded ? "SSDLite MobileNetV2 Ready" : "Loading SSDLite MobileNetV2..."}
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Button 
-                onClick={toggleFullscreen}
-                variant="ghost" 
-                size="icon" 
-                className="text-white hover:bg-slate-700"
-                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-              >
-                <Maximize className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
-                <Download className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
-                <Share className="h-4 w-4" />
-              </Button>
-            </div>
+        <div className="flex justify-between items-center text-white">
+          <div>{currentTimestamp}</div>
+          <div className="flex gap-2">
+            <Button onClick={handlePlayPause} variant="outline">
+              {isActive ? <Pause /> : <Play />}
+            </Button>
+            <Button onClick={toggleFullscreen} variant="outline">
+              <Maximize />
+            </Button>
           </div>
         </div>
       </CardContent>
