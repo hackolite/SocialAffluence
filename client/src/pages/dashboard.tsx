@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/layout/header";
 import MetricsCards from "@/components/dashboard/metrics-cards";
 import CameraMonitoring from "@/components/dashboard/camera-monitoring";
@@ -32,8 +30,12 @@ export interface SystemStatus {
 }
 
 export default function Dashboard() {
-  // === States ===
-  const [detectionCounts, setDetectionCounts] = useState<DetectionCounts>({ total: 0, people: 0, classCounts: {} });
+  const [detectionCounts, setDetectionCounts] = useState<DetectionCounts>({
+    total: 0,
+    people: 0,
+    classCounts: {},
+  });
+
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
     camerasActive: 1,
     isRecording: true,
@@ -41,38 +43,70 @@ export default function Dashboard() {
     aiDetectionActive: true,
     cameraConnected: true,
   });
+
   const [totalDetections, setTotalDetections] = useState(0);
   const [peopleDetected, setPeopleDetected] = useState(0);
-  const [cumulativeClassCounts, setCumulativeClassCounts] = useState<Record<string, number>>({});
+  const [cumulativeClassCounts, setCumulativeClassCounts] = useState<
+    Record<string, number>
+  >({});
   const [timelineData, setTimelineData] = useState<TimelineData[]>([]);
   const [currentMinuteCounts, setCurrentMinuteCounts] = useState({
     people: 0,
     total: 0,
     classCounts: {} as Record<string, number>,
   });
-  const [minuteStart, setMinuteStart] = useState<number>(startOfMinute(new Date()).getTime());
+
+  const [minuteStart, setMinuteStart] = useState<number>(
+    startOfMinute(new Date()).getTime(),
+  );
+
   const { socket, isConnected } = useWebSocket();
 
-  // === Handlers ===
-  const handleDetectionUpdate = useCallback((counts: DetectionCounts) => {
+  useEffect(() => {
+    if (!socket) return;
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "detection_update") {
+          handleDetectionUpdate(data.counts);
+        } else if (data.type === "system_status") {
+          setSystemStatus(data.status);
+        } else if (data.type === "total_metrics") {
+          setTotalDetections(data.total);
+          setPeopleDetected(data.people);
+        }
+      } catch (error) {
+        console.error("WebSocket message parsing error:", error);
+      }
+    };
+    socket.addEventListener("message", handleMessage);
+    return () => socket.removeEventListener("message", handleMessage);
+  }, [socket]);
+
+  const handleDetectionUpdate = (counts: DetectionCounts) => {
     if (counts.total <= 0) return;
 
     setDetectionCounts(counts);
+
+    // Mise à jour des totaux globaux
     setTotalDetections((prev) => prev + counts.total);
     setPeopleDetected((prev) => prev + counts.people);
 
     setCumulativeClassCounts((prev) => {
       const updated = { ...prev };
       for (const className in counts.classCounts) {
-        updated[className] = (updated[className] || 0) + counts.classCounts[className];
+        updated[className] =
+          (updated[className] || 0) + counts.classCounts[className];
       }
       return updated;
     });
 
+    // Ajout aux compteurs de la minute en cours
     setCurrentMinuteCounts((prev) => {
       const updatedClassCounts = { ...prev.classCounts };
       for (const className in counts.classCounts) {
-        updatedClassCounts[className] = (updatedClassCounts[className] || 0) + counts.classCounts[className];
+        updatedClassCounts[className] =
+          (updatedClassCounts[className] || 0) + counts.classCounts[className];
       }
       return {
         people: prev.people + counts.people,
@@ -80,38 +114,16 @@ export default function Dashboard() {
         classCounts: updatedClassCounts,
       };
     });
-  }, []);
+  };
 
-  const handleWebSocketMessage = useCallback((event: MessageEvent) => {
-    try {
-      const data = JSON.parse(event.data);
-      if (data.type === "detection_update") {
-        handleDetectionUpdate(data.counts);
-      } else if (data.type === "system_status") {
-        setSystemStatus(data.status);
-      } else if (data.type === "total_metrics") {
-        setTotalDetections(data.total);
-        setPeopleDetected(data.people);
-      }
-    } catch (error) {
-      console.error("WebSocket message parsing error:", error);
-    }
-  }, [handleDetectionUpdate]);
-
-  // === WebSocket Events ===
-  useEffect(() => {
-    if (!socket) return;
-    socket.addEventListener("message", handleWebSocketMessage);
-    return () => socket.removeEventListener("message", handleWebSocketMessage);
-  }, [socket, handleWebSocketMessage]);
-
-  // === Timeline update every minute ===
+  // Mise à jour toutes les minutes
   useEffect(() => {
     const now = new Date();
     const nextMinute = addMinutes(startOfMinute(now), 1);
     const delay = nextMinute.getTime() - now.getTime();
 
     const timeout = setTimeout(() => {
+      // Ajouter la minute écoulée au timelineData
       setTimelineData((prev) => [
         ...prev,
         {
@@ -122,6 +134,7 @@ export default function Dashboard() {
         },
       ]);
 
+      // Réinitialiser les compteurs
       setCurrentMinuteCounts({ people: 0, total: 0, classCounts: {} });
       setMinuteStart(startOfMinute(new Date()).getTime());
     }, delay);
@@ -129,7 +142,6 @@ export default function Dashboard() {
     return () => clearTimeout(timeout);
   }, [currentMinuteCounts, minuteStart]);
 
-  // === UI ===
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800">
       <Header />
@@ -141,14 +153,17 @@ export default function Dashboard() {
           isConnected={isConnected}
         />
         <div className="grid lg:grid-cols-3 gap-6 mb-6">
-          <div className="col-span-1 lg:col-span-2 w-full max-h-[70vh] overflow-hidden">
+          <div className="lg:col-span-2">
             <CameraMonitoring
               onDetectionUpdate={handleDetectionUpdate}
               currentDetections={detectionCounts}
             />
           </div>
           <div className="space-y-4">
-            <LiveMetrics detectionCounts={detectionCounts} systemStatus={systemStatus} />
+            <LiveMetrics
+              detectionCounts={detectionCounts}
+              systemStatus={systemStatus}
+            />
             <RecentAlerts />
           </div>
         </div>
