@@ -46,9 +46,7 @@ export default function Dashboard() {
 
   const [totalDetections, setTotalDetections] = useState(0);
   const [peopleDetected, setPeopleDetected] = useState(0);
-  const [cumulativeClassCounts, setCumulativeClassCounts] = useState<
-    Record<string, number>
-  >({});
+  const [cumulativeClassCounts, setCumulativeClassCounts] = useState<Record<string, number>>({});
   const [timelineData, setTimelineData] = useState<TimelineData[]>([]);
   const [currentMinuteCounts, setCurrentMinuteCounts] = useState({
     people: 0,
@@ -57,7 +55,7 @@ export default function Dashboard() {
   });
 
   const [minuteStart, setMinuteStart] = useState<number>(
-    startOfMinute(new Date()).getTime(),
+    startOfMinute(new Date()).getTime()
   );
 
   const { socket, isConnected } = useWebSocket();
@@ -87,8 +85,6 @@ export default function Dashboard() {
     if (counts.total <= 0) return;
 
     setDetectionCounts(counts);
-
-    // Mise à jour des totaux globaux
     setTotalDetections((prev) => prev + counts.total);
     setPeopleDetected((prev) => prev + counts.people);
 
@@ -101,7 +97,6 @@ export default function Dashboard() {
       return updated;
     });
 
-    // Ajout aux compteurs de la minute en cours
     setCurrentMinuteCounts((prev) => {
       const updatedClassCounts = { ...prev.classCounts };
       for (const className in counts.classCounts) {
@@ -116,14 +111,12 @@ export default function Dashboard() {
     });
   };
 
-  // Mise à jour toutes les minutes
   useEffect(() => {
     const now = new Date();
     const nextMinute = addMinutes(startOfMinute(now), 1);
     const delay = nextMinute.getTime() - now.getTime();
 
     const timeout = setTimeout(() => {
-      // Ajouter la minute écoulée au timelineData
       setTimelineData((prev) => [
         ...prev,
         {
@@ -134,7 +127,6 @@ export default function Dashboard() {
         },
       ]);
 
-      // Réinitialiser les compteurs
       setCurrentMinuteCounts({ people: 0, total: 0, classCounts: {} });
       setMinuteStart(startOfMinute(new Date()).getTime());
     }, delay);
@@ -152,14 +144,15 @@ export default function Dashboard() {
           peopleDetected={peopleDetected}
           isConnected={isConnected}
         />
-        <div className="grid lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
+
+        <div className="grid gap-6 mb-6 lg:grid-cols-3">
+          <div className="col-span-1 lg:col-span-2 w-full">
             <CameraMonitoring
               onDetectionUpdate={handleDetectionUpdate}
               currentDetections={detectionCounts}
             />
           </div>
-          <div className="space-y-4">
+          <div className="flex flex-col gap-6 w-full">
             <LiveMetrics
               detectionCounts={detectionCounts}
               systemStatus={systemStatus}
@@ -167,6 +160,7 @@ export default function Dashboard() {
             <RecentAlerts />
           </div>
         </div>
+
         <AnalyticsDashboard
           timelineData={timelineData}
           cumulativeClassCounts={cumulativeClassCounts}
