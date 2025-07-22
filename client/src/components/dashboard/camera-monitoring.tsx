@@ -1,21 +1,21 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-  Camera, 
-  Activity, 
-  Play, 
-  Pause, 
-  Eye, 
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Camera,
+  Activity,
+  Play,
+  Pause,
+  Eye,
   Maximize,
   Download,
   Share,
   Brain,
-  AlertCircle
-} from 'lucide-react';
-import { DetectionCounts } from '@/pages/dashboard';
-import { useYoloDetection } from '@/hooks/use-yolo-detection';
+  AlertCircle,
+} from "lucide-react";
+import { DetectionCounts } from "@/pages/dashboard";
+import { useYoloDetection } from "@/hooks/use-yolo-detection";
 
 interface DetectionBox {
   x: number;
@@ -31,9 +31,9 @@ interface CameraMonitoringProps {
   currentDetections: DetectionCounts;
 }
 
-const CameraMonitoring: React.FC<CameraMonitoringProps> = ({ 
-  onDetectionUpdate, 
-  currentDetections 
+const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
+  onDetectionUpdate,
+  currentDetections,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -44,13 +44,18 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [fps] = useState<number>(1);
   const [detectionBoxes, setDetectionBoxes] = useState<DetectionBox[]>([]);
-  const [selectedCamera, setSelectedCamera] = useState<string>('Camera');
-  const [currentTimestamp, setCurrentTimestamp] = useState<string>('');
+  const [selectedCamera, setSelectedCamera] = useState<string>("Camera");
+  const [currentTimestamp, setCurrentTimestamp] = useState<string>("");
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+
   // YOLO detection hook
-  const { detectObjects, isModelLoaded, isProcessing, error: yoloError } = useYoloDetection();
+  const {
+    detectObjects,
+    isModelLoaded,
+    isProcessing,
+    error: yoloError,
+  } = useYoloDetection();
 
   const startCamera = useCallback(async (): Promise<void> => {
     try {
@@ -58,22 +63,22 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
         video: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
-          facingMode: 'environment'
-        }
+          facingMode: "environment",
+        },
       });
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         setCameraError(null);
       }
     } catch (err) {
-      console.error('Camera access error:', err);
+      console.error("Camera access error:", err);
       const error = err as Error;
       setCameraError(
-        error.name === 'NotAllowedError' 
-          ? 'Camera access denied. Please allow camera access.'
-          : 'Unable to access camera.'
+        error.name === "NotAllowedError"
+          ? "Camera access denied. Please allow camera access."
+          : "Unable to access camera.",
       );
     }
   }, []);
@@ -85,11 +90,11 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       });
       streamRef.current = null;
     }
-    
+
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
-    
+
     setCameraError(null);
   }, []);
 
@@ -102,40 +107,40 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     try {
       const detectedBoxes = await detectObjects(video);
       setDetectionBoxes(detectedBoxes);
-      
+
       // Count detections by type
       let peopleCount = 0;
       const classCounts: Record<string, number> = {};
-      
-      detectedBoxes.forEach(box => {
+
+      detectedBoxes.forEach((box) => {
         // Count by specific class
         classCounts[box.class] = (classCounts[box.class] || 0) + 1;
-        
+
         // Count people specifically
-        if (box.class === 'person') {
+        if (box.class === "person") {
           peopleCount++;
         }
       });
-      
+
       const newCounts = {
         total: detectedBoxes.length,
         people: peopleCount,
-        classCounts
+        classCounts,
       };
-      
+
       onDetectionUpdate(newCounts);
     } catch (error) {
-      console.error('YOLO detection error:', error);
+      console.error("YOLO detection error:", error);
     }
   }, [detectObjects, onDetectionUpdate]);
 
   const drawDetections = useCallback((): void => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    
+
     if (!canvas || !video) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     canvas.width = video.videoWidth;
@@ -147,21 +152,30 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       // Different colors for different classes
       const getClassColor = (className: string): string => {
         switch (className) {
-          case 'person': return '#10B981'; // Green
-          case 'car': case 'bus': case 'truck': return '#F59E0B'; // Orange
-          case 'bicycle': case 'motorcycle': return '#3B82F6'; // Blue
-          case 'cat': case 'dog': return '#EF4444'; // Red
-          default: return '#8B5CF6'; // Purple
+          case "person":
+            return "#10B981"; // Green
+          case "car":
+          case "bus":
+          case "truck":
+            return "#F59E0B"; // Orange
+          case "bicycle":
+          case "motorcycle":
+            return "#3B82F6"; // Blue
+          case "cat":
+          case "dog":
+            return "#EF4444"; // Red
+          default:
+            return "#8B5CF6"; // Purple
         }
       };
-      
+
       const color = getClassColor(box.class);
       ctx.strokeStyle = color;
       ctx.lineWidth = isFullscreen ? 30 : 20;
       ctx.strokeRect(box.x, box.y, box.width, box.height);
 
       ctx.fillStyle = color;
-      ctx.font = isFullscreen ? '70px Arial' : '70px Arial';
+      ctx.font = isFullscreen ? "70px Arial" : "70px Arial";
       const label = `${box.class} ${Math.round(box.confidence * 100)}%`;
       ctx.fillText(label, box.x, box.y - 5);
     });
@@ -171,16 +185,15 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     if (!isActive) {
       await startCamera();
       setIsActive(true);
-      
+
       intervalRef.current = setInterval(() => {
         runYoloDetection();
         drawDetections();
       }, 500);
-      
     } else {
       setIsActive(false);
       stopCamera();
-      
+
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -191,7 +204,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   // Gestion du plein écran
   const toggleFullscreen = useCallback(async () => {
     if (!cardRef.current) return;
-    
+
     try {
       if (!isFullscreen) {
         // Entrer en plein écran
@@ -215,7 +228,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
         setIsFullscreen(false);
       }
     } catch (error) {
-      console.error('Erreur lors du basculement en plein écran:', error);
+      console.error("Erreur lors du basculement en plein écran:", error);
     }
   }, [isFullscreen]);
 
@@ -230,29 +243,37 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       setIsFullscreen(isCurrentlyFullscreen);
     };
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("msfullscreenchange", handleFullscreenChange);
 
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange,
+      );
+      document.removeEventListener(
+        "msfullscreenchange",
+        handleFullscreenChange,
+      );
     };
   }, []);
 
   useEffect(() => {
     const updateTimestamp = () => {
       const now = new Date();
-      setCurrentTimestamp(now.toLocaleString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      }));
+      setCurrentTimestamp(
+        now.toLocaleString("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }),
+      );
     };
 
     updateTimestamp();
@@ -274,7 +295,10 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   }, [detectionBoxes, isActive, drawDetections]);
 
   return (
-    <Card ref={cardRef} className={`glass ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
+    <Card
+      ref={cardRef}
+      className={`glass ${isFullscreen ? "fixed inset-0 z-50 bg-black" : ""}`}
+    >
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center text-white">
@@ -282,11 +306,17 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             Live Affluence Monitoring
           </CardTitle>
           <div className="flex items-center space-x-2">
-            <Badge variant={isActive ? "default" : "secondary"} className="bg-slate-700">
+            <Badge
+              variant={isActive ? "default" : "secondary"}
+              className="bg-slate-700"
+            >
               <Activity className="mr-1 h-3 w-3" />
               {isActive ? `${fps} FPS` : "STOPPED"}
             </Badge>
-            <Badge variant={isModelLoaded ? "default" : "secondary"} className="bg-slate-700">
+            <Badge
+              variant={isModelLoaded ? "default" : "secondary"}
+              className="bg-slate-700"
+            >
               <Brain className="mr-1 h-3 w-3" />
               {isModelLoaded ? "SSDLite" : "LOADING"}
             </Badge>
@@ -296,31 +326,34 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
                 FALLBACK
               </Badge>
             )}
-            <select 
+            <select
               className="bg-slate-700 text-white rounded-lg px-3 py-1 text-sm border border-slate-600"
               value={selectedCamera}
               onChange={(e) => setSelectedCamera(e.target.value)}
             >
-              <option value="Camera 1 - Front Entrance">Camera 1 - Front Entrance</option>
+              <option value="Camera 1 - Front Entrance">
+                Camera 1 - Front Entrance
+              </option>
             </select>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className={`relative bg-slate-800 rounded-lg border border-slate-700 overflow-hidden mb-4 ${isFullscreen ? 'aspect-auto h-[calc(100vh-200px)]' : 'aspect-video'}`}>
+        <div
+          className={`relative bg-slate-800 rounded-lg border border-slate-700 overflow-hidden mb-4 ${isFullscreen ? "aspect-auto h-[calc(100vh-200px)]" : "aspect-video"}`}
+        >
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
             autoPlay
             muted
             playsInline
-            style={{ display: cameraError ? 'none' : 'block' }}
+            style={{ display: cameraError ? "none" : "block" }}
           />
           <canvas
             ref={canvasRef}
             className="absolute top-0 left-0 w-full h-full pointer-events-none"
           />
-
 
           <div className="absolute top-4 right-4 flex items-center space-x-2 glass rounded-lg p-2 backdrop-blur-sm">
             <div className="w-2 h-2 bg-destructive rounded-full pulse-animation"></div>
@@ -349,56 +382,79 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="space-y-4">
           {yoloError && (
             <div className="bg-destructive/20 border border-destructive/50 rounded-lg p-3">
               <div className="flex items-center space-x-2">
                 <AlertCircle className="h-4 w-4 text-destructive" />
-                <span className="text-sm text-destructive">SSDLite MobileNetV2 Error: {yoloError}</span>
+                <span className="text-sm text-destructive">
+                  SSDLite MobileNetV2 Error: {yoloError}
+                </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
                 Using fallback detection mode for demonstration purposes
               </p>
             </div>
           )}
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Button
                 onClick={handlePlayPause}
-                className={isActive ? "gradient-danger hover:opacity-90" : "gradient-primary hover:opacity-90"}
+                className={
+                  isActive
+                    ? "gradient-danger hover:opacity-90"
+                    : "gradient-primary hover:opacity-90"
+                }
                 disabled={!isModelLoaded && !yoloError}
               >
-                {isActive ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                {isActive ? (
+                  <Pause className="mr-2 h-4 w-4" />
+                ) : (
+                  <Play className="mr-2 h-4 w-4" />
+                )}
                 {isActive ? "Stop Monitoring" : "Start Monitoring"}
               </Button>
-              <Button variant="outline" className="bg-slate-700 hover:bg-slate-600 border-slate-600">
+              <Button
+                variant="outline"
+                className="bg-slate-700 hover:bg-slate-600 border-slate-600"
+              >
                 <Camera className="mr-2 h-4 w-4" />
                 Snapshot
               </Button>
               <div className="flex items-center space-x-2 text-xs text-slate-400">
                 <Brain className="h-3 w-3" />
                 <span>
-                  {isModelLoaded ? "SSDLite MobileNetV2 Ready" : "Loading SSDLite MobileNetV2..."}
+                  {isModelLoaded
+                    ? "SSDLite MobileNetV2 Ready"
+                    : "Loading SSDLite MobileNetV2..."}
                 </span>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
-              <Button 
+              <Button
                 onClick={toggleFullscreen}
-                variant="ghost" 
-                size="icon" 
+                variant="ghost"
+                size="icon"
                 className="text-white hover:bg-slate-700"
-                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
               >
                 <Maximize className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-slate-700"
+              >
                 <Download className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-slate-700"
+              >
                 <Share className="h-4 w-4" />
               </Button>
             </div>
