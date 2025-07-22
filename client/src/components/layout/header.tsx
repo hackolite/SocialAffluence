@@ -1,10 +1,41 @@
-import { Bell, Settings, User, ShieldCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Bell, Settings, User, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Header() {
+  const [visible, setVisible] = useState(true);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickTopZone = (e: MouseEvent) => {
+      if (!visible && e.clientY <= 80) {
+        setVisible(true);
+      }
+    };
+
+    window.addEventListener("click", handleClickTopZone);
+    return () => window.removeEventListener("click", handleClickTopZone);
+  }, [visible]);
+
+  if (!visible) return null;
+
   return (
-    <header className="glass sticky top-0 z-50 border-b border-border">
-      <div className="container mx-auto px-4 py-4">
+    <header
+      ref={headerRef}
+      className="glass sticky top-0 z-50 border-b border-border"
+    >
+      <div className="container mx-auto px-4 py-4 relative">
+        {/* Bouton croix */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 text-white hover:bg-slate-700"
+          onClick={() => setVisible(false)}
+          title="Masquer le header"
+        >
+          <X className="h-5 w-5" />
+        </Button>
+
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
@@ -14,23 +45,40 @@ export default function Header() {
               <h1 className="text-xl font-bold text-white">SocialAffluence</h1>
             </div>
             <nav className="hidden md:flex space-x-6">
-              <a href="#" className="text-white hover:text-primary transition-colors">
+              <a
+                href="#"
+                className="text-white hover:text-primary transition-colors"
+              >
                 Dashboard
               </a>
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">
+              <a
+                href="#"
+                className="text-slate-400 hover:text-white transition-colors"
+              >
                 Analytics
               </a>
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">
+              <a
+                href="#"
+                className="text-slate-400 hover:text-white transition-colors"
+              >
                 Settings
               </a>
             </nav>
           </div>
-          
+
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-slate-700"
+            >
               <Bell className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-white hover:bg-slate-700">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-slate-700"
+            >
               <Settings className="h-5 w-5" />
             </Button>
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
