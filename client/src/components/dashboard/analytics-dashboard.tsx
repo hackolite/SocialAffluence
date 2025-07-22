@@ -23,7 +23,6 @@ interface AnalyticsDashboardProps {
   cumulativeClassCounts?: Record<string, number>;
 }
 
-// Couleurs fixes pour classes connues
 const classColors: Record<string, string> = {
   person: "#3b82f6",
   car: "#f97316",
@@ -35,7 +34,6 @@ const classColors: Record<string, string> = {
   cat: "#f43f5e",
 };
 
-// Cache des couleurs dynamiques générées
 const colorCache: Record<string, string> = {};
 
 function getRandomColor() {
@@ -55,7 +53,6 @@ export default function AnalyticsDashboard({
   timelineData,
   cumulativeClassCounts,
 }: AnalyticsDashboardProps) {
-  // Extraire toutes les classes détectées
   const allClassesSet = new Set<string>();
   timelineData.forEach((item) => {
     if (item.classCounts) {
@@ -64,8 +61,7 @@ export default function AnalyticsDashboard({
   });
   const allClasses = Array.from(allClassesSet);
 
-  // Préparer les données pour le graphique (max 60 dernières)
-  const chartData = timelineData.slice(-60).map((item) => {
+  const chartDataLastHour = timelineData.slice(-60).map((item) => {
     const dataPoint: Record<string, any> = {
       name: format(new Date(item.timestamp), "HH:mm"),
     };
@@ -75,7 +71,27 @@ export default function AnalyticsDashboard({
     return dataPoint;
   });
 
-  // Calcul cumul des classes (soit à partir du props, soit en calculant)
+  const groupedByHour: Record<string, Record<string, number>> = {};
+  timelineData.forEach((item) => {
+    const hour = format(new Date(item.timestamp), "HH:00");
+    if (!groupedByHour[hour]) {
+      groupedByHour[hour] = {};
+    }
+    Object.entries(item.classCounts ?? {}).forEach(([cls, count]) => {
+      groupedByHour[hour][cls] = (groupedByHour[hour][cls] || 0) + count;
+    });
+  });
+
+  const chartData24h = Object.entries(groupedByHour).map(([hour, counts]) => {
+    const dataPoint: Record<string, any> = {
+      name: hour,
+    };
+    allClasses.forEach((cls) => {
+      dataPoint[cls] = counts[cls] ?? 0;
+    });
+    return dataPoint;
+  }).slice(-24);
+
   const finalClassCounts: Record<string, number> = cumulativeClassCounts
     ? { ...cumulativeClassCounts }
     : {};
@@ -90,58 +106,35 @@ export default function AnalyticsDashboard({
     });
   }
 
-  // Trier les classes par nombre décroissant
   const allClassesSorted = Object.entries(finalClassCounts).sort(
-    (a, b) => b[1] - a[1],
+    (a, b) => b[1] - a[1]
   );
 
-  // Total personnes détectées (somme de people sur timeline)
   const totalPeople = timelineData.reduce((sum, item) => sum + item.people, 0);
-
-  // Total détections toutes classes cumulées
   const totalDetections = Object.values(finalClassCounts).reduce(
     (a, b) => a + b,
-    0,
+    0
   );
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
-      {/* Graphique stacked bar */}
       <Card className="glass">
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-            Stack détection par classe
+            Détection minute par minute (dernière heure)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
+              <BarChart data={chartDataLastHour}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis
-                  dataKey="name"
-                  stroke="#9ca3af"
-                  fontSize={12}
-                  tickLine={false}
-                />
+                <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} tickLine={false} />
                 <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#1f2937",
-                    border: "1px solid #374151",
-                    borderRadius: "8px",
-                    color: "#fff",
-                  }}
-                />
+                <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "1px solid #374151", borderRadius: "8px", color: "#fff" }} />
                 {allClasses.map((cls) => (
-                  <Bar
-                    key={cls}
-                    dataKey={cls}
-                    stackId="a"
-                    fill={getClassColor(cls)}
-                    name={cls}
-                  />
+                  <Bar key={cls} dataKey={cls} stackId="a" fill={getClassColor(cls)} name={cls} />
                 ))}
               </BarChart>
             </ResponsiveContainer>
@@ -149,7 +142,30 @@ export default function AnalyticsDashboard({
         </CardContent>
       </Card>
 
-      {/* Distribution cumulée */}
+      <Card className="glass">
+        <CardHeader>
+          <CardTitle className="text-lg text-white flex items-center">
+            <TrendingUp className="h-5 w-5 mr-2 text-primary" />
+            Détection heure par heure (24h)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData24h}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} tickLine={false} />
+                <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "1px solid #374151", borderRadius: "8px", color: "#fff" }} />
+                {allClasses.map((cls) => (
+                  <Bar key={cls} dataKey={cls} stackId="a" fill={getClassColor(cls)} name={cls} />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="glass">
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
@@ -161,50 +177,26 @@ export default function AnalyticsDashboard({
           <div className="h-64 overflow-y-auto pr-2">
             {allClassesSorted.length > 0 ? (
               <div className="space-y-4">
-                <div className="text-sm text-slate-300 font-medium">
-                  Classes détectées :
-                </div>
+                <div className="text-sm text-slate-300 font-medium">Classes détectées :</div>
                 {allClassesSorted.map(([cls, count]) => {
-                  const percentage =
-                    totalDetections > 0 ? (count / totalDetections) * 100 : 0;
+                  const percentage = totalDetections > 0 ? (count / totalDetections) * 100 : 0;
                   return (
-                    <div
-                      key={cls}
-                      className="flex items-center space-x-3 select-none"
-                      title={`${cls}: ${count} (${percentage.toFixed(1)}%)`}
-                    >
-                      <div className="w-24 text-sm text-slate-400 capitalize truncate">
-                        {cls}
-                      </div>
+                    <div key={cls} className="flex items-center space-x-3 select-none" title={`${cls}: ${count} (${percentage.toFixed(1)}%)`}>
+                      <div className="w-24 text-sm text-slate-400 capitalize truncate">{cls}</div>
                       <div className="flex-1 bg-slate-700 rounded-full h-2">
-                        <div
-                          className="h-2 rounded-full transition-all duration-500"
-                          style={{
-                            width: `${percentage}%`,
-                            backgroundColor: getClassColor(cls),
-                          }}
-                        />
+                        <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${percentage}%`, backgroundColor: getClassColor(cls) }} />
                       </div>
-                      <div className="w-12 text-sm text-slate-400 text-right">
-                        {count}
-                      </div>
+                      <div className="w-12 text-sm text-slate-400 text-right">{count}</div>
                     </div>
                   );
                 })}
                 <div className="border-t border-slate-700 pt-3">
                   <div className="text-center">
-                    <div className="text-xl font-bold text-blue-500">
-                      {totalPeople}
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      Personnes connues détectées
-                    </div>
+                    <div className="text-xl font-bold text-blue-500">{totalPeople}</div>
+                    <div className="text-xs text-slate-400">Personnes connues détectées</div>
                   </div>
                   <div className="text-center text-xs text-slate-400 mt-2">
-                    Total détections (toutes classes) :{" "}
-                    <span className="font-semibold text-white">
-                      {totalDetections}
-                    </span>
+                    Total détections (toutes classes) : <span className="font-semibold text-white">{totalDetections}</span>
                   </div>
                 </div>
               </div>
