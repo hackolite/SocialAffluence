@@ -363,7 +363,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
               className="bg-slate-700"
             >
               <Activity className="mr-1 h-3 w-3" />
-              {isActive ? `${fps} FPS` : "STOPPED"}
+              {isActive ? `${fps} FPS` : "OFF"}
             </Badge>
             <Badge
               variant={isModelLoaded ? "default" : "secondary"}
