@@ -282,8 +282,14 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       };
 
       if (videoContainerRef.current) {
-        videoContainerRef.current.addEventListener('mousemove', handleMouseMove);
-        videoContainerRef.current.addEventListener('mouseleave', handleMouseLeave);
+        videoContainerRef.current.addEventListener(
+          "mousemove",
+          handleMouseMove,
+        );
+        videoContainerRef.current.addEventListener(
+          "mouseleave",
+          handleMouseLeave,
+        );
       }
 
       // Initial hide timer
@@ -294,8 +300,14 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       return () => {
         clearTimeout(hideTimeout);
         if (videoContainerRef.current) {
-          videoContainerRef.current.removeEventListener('mousemove', handleMouseMove);
-          videoContainerRef.current.removeEventListener('mouseleave', handleMouseLeave);
+          videoContainerRef.current.removeEventListener(
+            "mousemove",
+            handleMouseMove,
+          );
+          videoContainerRef.current.removeEventListener(
+            "mouseleave",
+            handleMouseLeave,
+          );
         }
       };
     } else {
@@ -373,8 +385,8 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
         <div
           ref={videoContainerRef}
           className={`relative bg-slate-800 rounded-lg border border-slate-700 overflow-hidden mb-4 group cursor-pointer ${
-            isFullscreen 
-              ? "fixed inset-0 z-50 bg-black rounded-none border-none mb-0" 
+            isFullscreen
+              ? "fixed inset-0 z-50 bg-black rounded-none border-none mb-0"
               : "aspect-video"
           }`}
           onClick={isFullscreen ? undefined : toggleFullscreen}
@@ -393,7 +405,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
           />
 
           {/* Bouton Fullscreen dans la vidéo */}
-          <div 
+          <div
             className={`absolute top-4 left-4 transition-opacity duration-300 ${
               showControls ? "opacity-100" : "opacity-0"
             }`}
@@ -419,7 +431,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
           </div>
 
           {/* Indicateur REC */}
-          <div 
+          <div
             className={`absolute top-4 right-4 flex items-center space-x-2 glass rounded-lg p-2 backdrop-blur-sm transition-opacity duration-300 ${
               showControls ? "opacity-100" : "opacity-0"
             }`}
@@ -430,7 +442,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
 
           {/* Indicateur AI Processing */}
           {isProcessing && (
-            <div 
+            <div
               className={`absolute top-20 right-4 glass rounded-lg p-2 backdrop-blur-sm transition-opacity duration-300 ${
                 showControls ? "opacity-100" : "opacity-0"
               }`}
@@ -443,7 +455,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
           )}
 
           {/* Timestamp */}
-          <div 
+          <div
             className={`absolute bottom-4 right-4 glass rounded-lg p-2 backdrop-blur-sm transition-opacity duration-300 ${
               showControls ? "opacity-100" : "opacity-0"
             }`}
@@ -508,21 +520,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
                 )}
                 {isActive ? "Stop Monitoring" : "Start Monitoring"}
               </Button>
-              <Button
-                variant="outline"
-                className="bg-slate-700 hover:bg-slate-600 border-slate-600"
-              >
-                <Camera className="mr-2 h-4 w-4" />
-                Snapshot
-              </Button>
-              <div className="flex items-center space-x-2 text-xs text-slate-400">
-                <Brain className="h-3 w-3" />
-                <span>
-                  {isModelLoaded
-                    ? "SSDLite MobileNetV2 Ready"
-                    : "Loading SSDLite MobileNetV2..."}
-                </span>
-              </div>
+
             </div>
 
             <div className="flex items-center space-x-2">
