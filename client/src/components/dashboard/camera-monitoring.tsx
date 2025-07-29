@@ -326,15 +326,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
                 FALLBACK
               </Badge>
             )}
-            <select
-              className="bg-slate-700 text-white rounded-lg px-3 py-1 text-sm border border-slate-600"
-              value={selectedCamera}
-              onChange={(e) => setSelectedCamera(e.target.value)}
-            >
-              <option value="Camera 1 - Front Entrance">
-                Camera 1 - Front Entrance
-              </option>
-            </select>
+
           </div>
         </div>
       </CardHeader>

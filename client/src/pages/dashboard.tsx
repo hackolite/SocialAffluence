@@ -137,34 +137,50 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800">
       <Header />
-      <main className="container mx-auto px-4 py-6">
-        <MetricsCards
-          activeCameras={systemStatus.camerasActive}
-          totalDetections={totalDetections}
-          peopleDetected={peopleDetected}
-          isConnected={isConnected}
-        />
+      <main className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6">
+        {/* Metrics Cards - Full responsive */}
+        <div className="mb-4 sm:mb-6">
+          <MetricsCards
+            activeCameras={systemStatus.camerasActive}
+            totalDetections={totalDetections}
+            peopleDetected={peopleDetected}
+            isConnected={isConnected}
+          />
+        </div>
 
-        <div className="grid gap-6 mb-6 lg:grid-cols-3">
-          <div className="col-span-1 lg:col-span-2 w-full">
+        {/* Main Content Grid - Responsive layout */}
+        <div className="grid gap-4 sm:gap-6 mb-4 sm:mb-6 grid-cols-1 xl:grid-cols-3">
+          {/* Camera Monitoring - Takes full width on mobile, 2/3 on desktop */}
+          <div className="xl:col-span-2 w-full">
             <CameraMonitoring
               onDetectionUpdate={handleDetectionUpdate}
               currentDetections={detectionCounts}
             />
           </div>
-          <div className="flex flex-col gap-6 w-full">
-            <LiveMetrics
-              detectionCounts={detectionCounts}
-              systemStatus={systemStatus}
-            />
-            <RecentAlerts />
+
+          {/* Side Panel - Stack vertically on mobile, sidebar on desktop */}
+          <div className="xl:col-span-1 w-full">
+            <div className="flex flex-col gap-4 sm:gap-6 w-full">
+              <div className="w-full">
+                <LiveMetrics
+                  detectionCounts={detectionCounts}
+                  systemStatus={systemStatus}
+                />
+              </div>
+              <div className="w-full">
+                <RecentAlerts />
+              </div>
+            </div>
           </div>
         </div>
 
-        <AnalyticsDashboard
-          timelineData={timelineData}
-          cumulativeClassCounts={cumulativeClassCounts}
-        />
+        {/* Analytics Dashboard - Full width responsive */}
+        <div className="w-full">
+          <AnalyticsDashboard
+            timelineData={timelineData}
+            cumulativeClassCounts={cumulativeClassCounts}
+          />
+        </div>
       </main>
     </div>
   );
