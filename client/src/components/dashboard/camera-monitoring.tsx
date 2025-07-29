@@ -9,6 +9,7 @@ import {
   Pause,
   Eye,
   Maximize,
+  Minimize,
   Download,
   Share,
   Brain,
@@ -39,6 +40,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -47,6 +49,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   const [selectedCamera, setSelectedCamera] = useState<string>("Camera");
   const [currentTimestamp, setCurrentTimestamp] = useState<string>("");
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [showControls, setShowControls] = useState<boolean>(true);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // YOLO detection hook
@@ -201,21 +204,20 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     }
   };
 
-  // Gestion du plein écran
+  // Gestion du plein écran pour le conteneur vidéo
   const toggleFullscreen = useCallback(async () => {
-    if (!cardRef.current) return;
+    if (!videoContainerRef.current) return;
 
     try {
       if (!isFullscreen) {
         // Entrer en plein écran
-        if (cardRef.current.requestFullscreen) {
-          await cardRef.current.requestFullscreen();
-        } else if ((cardRef.current as any).webkitRequestFullscreen) {
-          await (cardRef.current as any).webkitRequestFullscreen();
-        } else if ((cardRef.current as any).msRequestFullscreen) {
-          await (cardRef.current as any).msRequestFullscreen();
+        if (videoContainerRef.current.requestFullscreen) {
+          await videoContainerRef.current.requestFullscreen();
+        } else if ((videoContainerRef.current as any).webkitRequestFullscreen) {
+          await (videoContainerRef.current as any).webkitRequestFullscreen();
+        } else if ((videoContainerRef.current as any).msRequestFullscreen) {
+          await (videoContainerRef.current as any).msRequestFullscreen();
         }
-        setIsFullscreen(true);
       } else {
         // Sortir du plein écran
         if (document.exitFullscreen) {
@@ -225,7 +227,6 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
         } else if ((document as any).msExitFullscreen) {
           await (document as any).msExitFullscreen();
         }
-        setIsFullscreen(false);
       }
     } catch (error) {
       console.error("Erreur lors du basculement en plein écran:", error);
@@ -260,6 +261,48 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     };
   }, []);
 
+  // Auto-hide controls in fullscreen
+  useEffect(() => {
+    let hideTimeout: NodeJS.Timeout;
+
+    if (isFullscreen) {
+      const handleMouseMove = () => {
+        setShowControls(true);
+        clearTimeout(hideTimeout);
+        hideTimeout = setTimeout(() => {
+          setShowControls(false);
+        }, 3000);
+      };
+
+      const handleMouseLeave = () => {
+        clearTimeout(hideTimeout);
+        hideTimeout = setTimeout(() => {
+          setShowControls(false);
+        }, 1000);
+      };
+
+      if (videoContainerRef.current) {
+        videoContainerRef.current.addEventListener('mousemove', handleMouseMove);
+        videoContainerRef.current.addEventListener('mouseleave', handleMouseLeave);
+      }
+
+      // Initial hide timer
+      hideTimeout = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+
+      return () => {
+        clearTimeout(hideTimeout);
+        if (videoContainerRef.current) {
+          videoContainerRef.current.removeEventListener('mousemove', handleMouseMove);
+          videoContainerRef.current.removeEventListener('mouseleave', handleMouseLeave);
+        }
+      };
+    } else {
+      setShowControls(true);
+    }
+  }, [isFullscreen]);
+
   useEffect(() => {
     const updateTimestamp = () => {
       const now = new Date();
@@ -277,7 +320,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     };
 
     updateTimestamp();
-    const timestampInterval = setInterval(updateTimestamp, 0);
+    const timestampInterval = setInterval(updateTimestamp, 1000);
 
     return () => {
       clearInterval(timestampInterval);
@@ -295,11 +338,8 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   }, [detectionBoxes, isActive, drawDetections]);
 
   return (
-    <Card
-      ref={cardRef}
-      className={`glass ${isFullscreen ? "fixed inset-0 z-50 bg-black" : ""}`}
-    >
-      <CardHeader>
+    <Card ref={cardRef} className="glass">
+      <CardHeader className={isFullscreen ? "hidden" : ""}>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center text-white">
             <Camera className="mr-2 h-5 w-5 text-primary" />
@@ -326,13 +366,18 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
                 FALLBACK
               </Badge>
             )}
-
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className={isFullscreen ? "p-0" : ""}>
         <div
-          className={`relative bg-slate-800 rounded-lg border border-slate-700 overflow-hidden mb-4 ${isFullscreen ? "aspect-auto h-[calc(100vh-200px)]" : "aspect-video"}`}
+          ref={videoContainerRef}
+          className={`relative bg-slate-800 rounded-lg border border-slate-700 overflow-hidden mb-4 group cursor-pointer ${
+            isFullscreen 
+              ? "fixed inset-0 z-50 bg-black rounded-none border-none mb-0" 
+              : "aspect-video"
+          }`}
+          onClick={isFullscreen ? undefined : toggleFullscreen}
         >
           <video
             ref={videoRef}
@@ -347,13 +392,49 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             className="absolute top-0 left-0 w-full h-full pointer-events-none"
           />
 
-          <div className="absolute top-4 right-4 flex items-center space-x-2 glass rounded-lg p-2 backdrop-blur-sm">
+          {/* Bouton Fullscreen dans la vidéo */}
+          <div 
+            className={`absolute top-4 left-4 transition-opacity duration-300 ${
+              showControls ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFullscreen();
+              }}
+              variant="ghost"
+              size="icon"
+              className={`glass backdrop-blur-md text-white hover:bg-white/20 border border-white/20 ${
+                isFullscreen ? "h-12 w-12" : "h-10 w-10"
+              }`}
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullscreen ? (
+                <Minimize className={isFullscreen ? "h-6 w-6" : "h-4 w-4"} />
+              ) : (
+                <Maximize className={isFullscreen ? "h-6 w-6" : "h-4 w-4"} />
+              )}
+            </Button>
+          </div>
+
+          {/* Indicateur REC */}
+          <div 
+            className={`absolute top-4 right-4 flex items-center space-x-2 glass rounded-lg p-2 backdrop-blur-sm transition-opacity duration-300 ${
+              showControls ? "opacity-100" : "opacity-0"
+            }`}
+          >
             <div className="w-2 h-2 bg-destructive rounded-full pulse-animation"></div>
             <span className="text-xs text-white">REC</span>
           </div>
 
+          {/* Indicateur AI Processing */}
           {isProcessing && (
-            <div className="absolute top-20 right-4 glass rounded-lg p-2 backdrop-blur-sm">
+            <div 
+              className={`absolute top-20 right-4 glass rounded-lg p-2 backdrop-blur-sm transition-opacity duration-300 ${
+                showControls ? "opacity-100" : "opacity-0"
+              }`}
+            >
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-accent rounded-full pulse-animation"></div>
                 <span className="text-xs text-white">AI Processing...</span>
@@ -361,10 +442,28 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             </div>
           )}
 
-          <div className="absolute bottom-4 right-4 glass rounded-lg p-2 backdrop-blur-sm">
+          {/* Timestamp */}
+          <div 
+            className={`absolute bottom-4 right-4 glass rounded-lg p-2 backdrop-blur-sm transition-opacity duration-300 ${
+              showControls ? "opacity-100" : "opacity-0"
+            }`}
+          >
             <span className="text-xs text-slate-200">{currentTimestamp}</span>
           </div>
 
+          {/* Instructions pour le plein écran (non-fullscreen seulement) */}
+          {!isFullscreen && !cameraError && (
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
+              <div className="glass rounded-lg p-4 backdrop-blur-md">
+                <div className="flex items-center space-x-2 text-white">
+                  <Maximize className="h-5 w-5" />
+                  <span className="text-sm">Click to enter fullscreen</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Erreur caméra */}
           {cameraError && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white">
               <div className="text-center">
@@ -375,7 +474,8 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
           )}
         </div>
 
-        <div className="space-y-4">
+        {/* Contrôles (masqués en plein écran) */}
+        <div className={`space-y-4 ${isFullscreen ? "hidden" : ""}`}>
           {yoloError && (
             <div className="bg-destructive/20 border border-destructive/50 rounded-lg p-3">
               <div className="flex items-center space-x-2">
@@ -426,15 +526,6 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
             </div>
 
             <div className="flex items-center space-x-2">
-              <Button
-                onClick={toggleFullscreen}
-                variant="ghost"
-                size="icon"
-                className="text-white hover:bg-slate-700"
-                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-              >
-                <Maximize className="h-4 w-4" />
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"
