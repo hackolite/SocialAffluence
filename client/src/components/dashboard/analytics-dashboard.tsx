@@ -166,7 +166,7 @@ export default function AnalyticsDashboard({
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-            Détection minute par minute (dernière heure)
+            Detection Per Minutes (Round Robin Last 59 Minutes)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -208,7 +208,7 @@ export default function AnalyticsDashboard({
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-            Détection heure par heure (24h)
+            Detection Per Hours (Round Robin Last 24 h)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -258,7 +258,7 @@ export default function AnalyticsDashboard({
             {allClassesSorted.length > 0 ? (
               <div className="space-y-4">
                 <div className="text-sm text-slate-300 font-medium">
-                  Classes détectées :
+                  Detected Classes :
                 </div>
                 {allClassesSorted.map(([cls, count]) => {
                   const percentage =
@@ -293,11 +293,11 @@ export default function AnalyticsDashboard({
                       {totalPeople}
                     </div>
                     <div className="text-xs text-slate-400">
-                      Personnes connues détectées
+                      Detected Persons
                     </div>
                   </div>
                   <div className="text-center text-xs text-slate-400 mt-2">
-                    Total détections (toutes classes) :{" "}
+                    Total Detections (All Classes) :{" "}
                     <span className="font-semibold text-white">
                       {totalDetections}
                     </span>
@@ -318,13 +318,13 @@ export default function AnalyticsDashboard({
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <Download className="h-5 w-5 mr-2 text-primary" />
-            Télécharger les données (gratuit)
+            Download Data (Free)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex justify-center">
             <Button onClick={() => downloadCSV(timelineData)}>
-              Télécharger le CSV
+              Download Affluence CSV
             </Button>
           </div>
         </CardContent>
