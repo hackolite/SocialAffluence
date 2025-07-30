@@ -26,16 +26,6 @@ export default function Header() {
     >
       <div className="container mx-auto px-4 py-4 relative">
         {/* Bouton croix */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 text-white hover:bg-slate-700"
-          onClick={() => setVisible(false)}
-          title="Masquer le header"
-        >
-          <X className="h-5 w-5" />
-        </Button>
-
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
