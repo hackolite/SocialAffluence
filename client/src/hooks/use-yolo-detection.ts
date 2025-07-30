@@ -68,7 +68,7 @@ export function useYoloDetection() {
         
         // Load COCO-SSD with SSDLite MobileNetV2 backbone
         const loadedModel = await cocoSsd.load({
-          base: 'mobilenet_v2' // This uses SSDLite MobileNetV2
+          base: 'lite_mobilenet_v2' // This uses SSDLite MobileNetV2
         });
         
         modelRef.current = loadedModel;
