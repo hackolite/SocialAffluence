@@ -64,8 +64,8 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 640 },
+          height: { ideal: 360 },
           facingMode: "environment",
         },
       });
@@ -192,7 +192,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
       intervalRef.current = setInterval(() => {
         runYoloDetection();
         drawDetections();
-      }, 500);
+      }, 100);
     } else {
       setIsActive(false);
       stopCamera();
