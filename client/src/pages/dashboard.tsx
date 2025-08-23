@@ -123,7 +123,7 @@ export default function Dashboard() {
           timestamp: minuteStart,
           people: currentMinuteCounts.people,
           total: currentMinuteCounts.total,
-          classCounts: currentMinuteCounts.classCounts,
+          classCounts: { ...currentMinuteCounts.classCounts },
         },
       ]);
 

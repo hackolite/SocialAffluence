@@ -101,7 +101,7 @@ export default function AnalyticsDashboard({
       Object.keys(item.classCounts).forEach((cls) => allClassesSet.add(cls));
     }
   });
-  const allClasses = Array.from(allClassesSet);
+  const allClasses = Array.from(allClassesSet).sort();
 
   const chartDataLastHour = timelineData.slice(-60).map((item) => {
     const dataPoint: Record<string, any> = {
