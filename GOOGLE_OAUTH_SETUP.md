@@ -25,8 +25,11 @@ Cette application supporte maintenant l'authentification via Google OAuth. Voici
    ```
    GOOGLE_CLIENT_ID=votre_client_id_google
    GOOGLE_CLIENT_SECRET=votre_client_secret_google
+   BASE_URL=https://social-affluence.com
    SESSION_SECRET=une_clé_secrète_aléatoire_pour_les_sessions
    ```
+
+   **Important pour la production :** La variable `BASE_URL` doit être configurée avec votre domaine HTTPS complet. Cela garantit que les redirections OAuth utilisent toujours HTTPS, même si un utilisateur accède initialement au site via HTTP.
 
 ## Utilisation
 

@@ -6,13 +6,19 @@ import type { User } from "@shared/schema";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const BASE_URL = process.env.BASE_URL;
 
 // Only configure Google OAuth if credentials are provided
 if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_CLIENT_ID !== 'demo_client_id') {
+  // Determine callback URL based on environment
+  const callbackURL = process.env.NODE_ENV === 'production' && BASE_URL 
+    ? `${BASE_URL}/auth/google/callback`
+    : "/auth/google/callback";
+
   passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "/auth/google/callback"
+    callbackURL: callbackURL
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       // Check if user already exists with this Google ID
