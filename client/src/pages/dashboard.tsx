@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Header from "@/components/layout/header";
 import MetricsCards from "@/components/dashboard/metrics-cards";
 import CameraMonitoring from "@/components/dashboard/camera-monitoring";
 import LiveMetrics from "@/components/dashboard/live-metrics";
@@ -136,7 +135,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800">
-      <Header />
       <main className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6">
         {/* Metrics Cards - Full responsive */}
         <div className="mb-4 sm:mb-6">
