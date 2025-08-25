@@ -31,8 +31,8 @@ export default function Signup() {
   };
 
   const handleGoogleSignup = () => {
-    // TODO: Implement Google SSO
-    console.log("Google signup");
+    // Redirect to Google OAuth endpoint (same as login)
+    window.location.href = '/api/auth/google';
   };
 
   const updateFormData = (field: string, value: string | boolean) => {

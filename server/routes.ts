@@ -1,10 +1,79 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
+import session from "express-session";
+import { passport } from "./auth";
 
 let wss: WebSocketServer;
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session middleware
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-this-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+
+  // Initialize Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // Authentication routes
+  const isGoogleConfigured = process.env.GOOGLE_CLIENT_ID && 
+                            process.env.GOOGLE_CLIENT_SECRET && 
+                            process.env.GOOGLE_CLIENT_ID !== 'demo_client_id';
+
+  if (isGoogleConfigured) {
+    app.get('/api/auth/google', 
+      passport.authenticate('google', { scope: ['profile', 'email'] })
+    );
+
+    app.get('/api/auth/google/callback',
+      passport.authenticate('google', { failureRedirect: '/login?error=google_auth_failed' }),
+      (req, res) => {
+        // Successful authentication, redirect to dashboard
+        res.redirect('/dashboard');
+      }
+    );
+  } else {
+    app.get('/api/auth/google', (req, res) => {
+      res.status(503).json({ 
+        error: 'Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.' 
+      });
+    });
+  }
+
+  // Login with local strategy
+  app.post('/api/auth/login',
+    passport.authenticate('local', { 
+      successRedirect: '/dashboard',
+      failureRedirect: '/login?error=invalid_credentials'
+    })
+  );
+
+  // Logout route
+  app.post('/api/auth/logout', (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        return res.status(500).json({ error: 'Logout failed' });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  // Get current user
+  app.get('/api/auth/user', (req, res) => {
+    if (req.isAuthenticated()) {
+      res.json(req.user);
+    } else {
+      res.status(401).json({ error: 'Not authenticated' });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time updates
