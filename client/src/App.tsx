@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { GlobalVideo } from "@/components/global-video";
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
@@ -85,6 +86,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        {/* Global Video Component - accessible across the entire app */}
+        <div className="fixed top-4 right-4 w-80 z-40">
+          <GlobalVideo className="shadow-2xl" />
+        </div>
         <Router />
       </TooltipProvider>
     </QueryClientProvider>
