@@ -12,7 +12,7 @@ Cette application supporte maintenant l'authentification via Google OAuth. Voici
 6. Créez un OAuth 2.0 Client ID :
    - Type d'application : Web application
    - Origines JavaScript autorisées : `http://localhost:5000` (pour le développement)
-   - URIs de redirection autorisées : `http://localhost:5000/api/auth/google/callback`
+   - URIs de redirection autorisées : `http://localhost:5000/auth/google/callback` (développement) ou `https://social-affluence.com/auth/google/callback` (production)
 
 ## Configuration de l'application
 
@@ -39,8 +39,8 @@ Le système créera automatiquement un compte utilisateur avec les informations 
 
 ## Routes API disponibles
 
-- `GET /api/auth/google` - Initie l'authentification Google
-- `GET /api/auth/google/callback` - Callback de retour de Google
+- `GET /auth/google` - Initie l'authentification Google
+- `GET /auth/google/callback` - Callback de retour de Google
 - `POST /api/auth/login` - Connexion avec nom d'utilisateur/mot de passe
 - `POST /api/auth/logout` - Déconnexion
 - `GET /api/auth/user` - Récupère l'utilisateur actuellement connecté

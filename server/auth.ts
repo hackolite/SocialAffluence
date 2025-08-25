@@ -12,7 +12,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_CLIENT_ID !== 'demo_clien
   passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
     clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/callback"
+    callbackURL: "/auth/google/callback"
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       // Check if user already exists with this Google ID

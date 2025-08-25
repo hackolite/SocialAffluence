@@ -32,7 +32,7 @@ export default function Signup() {
 
   const handleGoogleSignup = () => {
     // Redirect to Google OAuth endpoint (same as login)
-    window.location.href = '/api/auth/google';
+    window.location.href = '/auth/google';
   };
 
   const updateFormData = (field: string, value: string | boolean) => {

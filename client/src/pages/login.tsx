@@ -39,7 +39,7 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     // Redirect to Google OAuth endpoint
-    window.location.href = '/api/auth/google';
+    window.location.href = '/auth/google';
   };
 
   return (
