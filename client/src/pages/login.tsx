@@ -11,15 +11,35 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement login logic
-    console.log("Login attempt:", { email, password });
+    
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          username: email,
+          password: password,
+        }),
+      });
+
+      if (response.redirected) {
+        window.location.href = response.url;
+      } else if (!response.ok) {
+        throw new Error('Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Erreur de connexion. Vérifiez vos identifiants.');
+    }
   };
 
   const handleGoogleLogin = () => {
-    // TODO: Implement Google SSO
-    console.log("Google login");
+    // Redirect to Google OAuth endpoint
+    window.location.href = '/api/auth/google';
   };
 
   return (
