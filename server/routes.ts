@@ -2,13 +2,22 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import session from "express-session";
+import MemoryStore from "memorystore";
 import { passport } from "./auth";
 
 let wss: WebSocketServer;
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session store based on environment
+  const sessionStore = process.env.NODE_ENV === 'production' 
+    ? new (MemoryStore(session))({ 
+        checkPeriod: 86400000 // prune expired entries every 24h
+      })
+    : undefined; // Use default MemoryStore for development
+
   // Configure session middleware
   app.use(session({
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-this-in-production',
     resave: false,
     saveUninitialized: false,
@@ -74,10 +83,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    const health = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      features: {
+        googleOAuth: !!(process.env.GOOGLE_CLIENT_ID && 
+                       process.env.GOOGLE_CLIENT_SECRET && 
+                       process.env.GOOGLE_CLIENT_ID !== 'demo_client_id'),
+        database: !!process.env.DATABASE_URL,
+        sessionSecret: !!(process.env.SESSION_SECRET && 
+                          !process.env.SESSION_SECRET.includes('change-this'))
+      }
+    };
+    res.json(health);
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time updates
   wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+
+  // Add error handling for WebSocket server
+  wss.on('error', (error) => {
+    console.error('WebSocket server error:', error);
+  });
 
   wss.on('connection', (ws: WebSocket) => {
     console.log('WebSocket client connected');
@@ -100,19 +134,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     ws.on('close', () => console.log('WebSocket client disconnected'));
-    ws.on('error', (error) => console.error('WebSocket error:', error));
+    ws.on('error', (error) => console.error('WebSocket client error:', error));
 
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'system_status',
-        status: {
-          camerasActive: 3,
-          isRecording: true,
-          analysisRate: 1,
-          aiDetectionActive: true,
-          cameraConnected: true
-        }
-      }));
+    // Send initial status safely
+    try {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'system_status',
+          status: {
+            camerasActive: 3,
+            isRecording: true,
+            analysisRate: 1,
+            aiDetectionActive: true,
+            cameraConnected: true
+          }
+        }));
+      }
+    } catch (error) {
+      console.error('Error sending initial WebSocket message:', error);
     }
   });
 
@@ -123,10 +162,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 export function broadcastToClients(payload: object): void {
   if (!wss) return;
 
-  const data = JSON.stringify(payload);
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(data);
-    }
-  });
+  try {
+    const data = JSON.stringify(payload);
+    wss.clients.forEach((client) => {
+      try {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(data);
+        }
+      } catch (error) {
+        console.error('Error sending message to WebSocket client:', error);
+      }
+    });
+  } catch (error) {
+    console.error('Error broadcasting to WebSocket clients:', error);
+  }
 }
