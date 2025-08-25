@@ -28,11 +28,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                             process.env.GOOGLE_CLIENT_ID !== 'demo_client_id';
 
   if (isGoogleConfigured) {
-    app.get('/api/auth/google', 
+    app.get('/auth/google', 
       passport.authenticate('google', { scope: ['profile', 'email'] })
     );
 
-    app.get('/api/auth/google/callback',
+    app.get('/auth/google/callback',
       passport.authenticate('google', { failureRedirect: '/login?error=google_auth_failed' }),
       (req, res) => {
         // Successful authentication, redirect to dashboard
@@ -40,7 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     );
   } else {
-    app.get('/api/auth/google', (req, res) => {
+    app.get('/auth/google', (req, res) => {
       res.status(503).json({ 
         error: 'Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.' 
       });
