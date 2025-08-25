@@ -62,6 +62,89 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Videos Section */}
+      <section className="py-20 px-4 bg-slate-900/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Découvrez SocialAffluence en action
+            </h2>
+            <p className="text-slate-300 text-lg max-w-2xl mx-auto">
+              Plongez dans l'univers de l'analyse d'affluence avec nos vidéos de démonstration 
+              et découvrez comment notre technologie révolutionne la surveillance d'espaces.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Video 1 */}
+            <div className="glass border-slate-700 hover:border-primary/50 transition-all duration-300 hover:scale-105">
+              <div className="relative overflow-hidden rounded-lg">
+                <iframe 
+                  src="https://player.vimeo.com/video/148751763?h=0&title=0&byline=0&portrait=0" 
+                  className="w-full h-56 rounded-lg"
+                  frameBorder="0" 
+                  allow="autoplay; fullscreen; picture-in-picture" 
+                  allowFullScreen
+                  title="Démonstration IA"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent pointer-events-none" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-2">Intelligence Artificielle</h3>
+                <p className="text-slate-300 text-sm">
+                  Découvrez comment notre IA analyse en temps réel les flux de personnes 
+                  avec une précision exceptionnelle.
+                </p>
+              </div>
+            </div>
+
+            {/* Video 2 */}
+            <div className="glass border-slate-700 hover:border-primary/50 transition-all duration-300 hover:scale-105">
+              <div className="relative overflow-hidden rounded-lg">
+                <iframe 
+                  src="https://player.vimeo.com/video/148751765?h=0&title=0&byline=0&portrait=0" 
+                  className="w-full h-56 rounded-lg"
+                  frameBorder="0" 
+                  allow="autoplay; fullscreen; picture-in-picture" 
+                  allowFullScreen
+                  title="Tableau de bord"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent pointer-events-none" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-2">Tableau de Bord</h3>
+                <p className="text-slate-300 text-sm">
+                  Explorez notre interface intuitive et les métriques en temps réel 
+                  pour optimiser vos espaces.
+                </p>
+              </div>
+            </div>
+
+            {/* Video 3 */}
+            <div className="glass border-slate-700 hover:border-primary/50 transition-all duration-300 hover:scale-105">
+              <div className="relative overflow-hidden rounded-lg">
+                <iframe 
+                  src="https://player.vimeo.com/video/148751767?h=0&title=0&byline=0&portrait=0" 
+                  className="w-full h-56 rounded-lg"
+                  frameBorder="0" 
+                  allow="autoplay; fullscreen; picture-in-picture" 
+                  allowFullScreen
+                  title="Configuration caméras"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent pointer-events-none" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-2">Configuration Multi-Caméras</h3>
+                <p className="text-slate-300 text-sm">
+                  Apprenez à configurer et gérer plusieurs caméras simultanément 
+                  pour une surveillance complète.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Advantages Section */}
       <section id="features" className="py-20 px-4">
         <div className="container mx-auto">
