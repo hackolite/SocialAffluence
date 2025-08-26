@@ -2,11 +2,33 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import session from "express-session";
+import cors from "cors";
 import { passport } from "./auth";
 
 let wss: WebSocketServer;
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure CORS middleware - must be before session and passport
+  // This fixes the 401 error on /api/auth/user in production by allowing credentials (session cookies)
+  // to be sent from the frontend to the backend across different origins.
+  //
+  // To verify this fix works:
+  // 1. Deploy to production and open browser dev tools
+  // 2. Login via frontend (any auth method)
+  // 3. Check Network tab - requests to /api/auth/user should show:
+  //    - Request headers: Cookie: connect.sid=...
+  //    - Response headers: Access-Control-Allow-Origin: https://social-affluence.com
+  //                       Access-Control-Allow-Credentials: true
+  // 4. Response should be 200 with user data, not 401
+  app.use(cors({
+    origin: [
+      'https://social-affluence.com',    // Production domain
+      'http://localhost:3000',           // Development frontend (if needed)
+      'http://localhost:5000'            // Development server (for same-origin requests)
+    ],
+    credentials: true  // Allow cookies/session credentials to be sent
+  }));
+
   // Configure session middleware
   app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-this-in-production',
@@ -14,6 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin in production
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
   }));
