@@ -28,16 +28,17 @@ class DebugLogger {
 
   private constructor() {
     // Enable debug logging in development or when DEBUG env var is set
-    this.isEnabled = process.env.NODE_ENV === 'development' || 
-                     process.env.DEBUG === 'true' ||
+    this.isEnabled = (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') || 
+                     (typeof process !== 'undefined' && process.env?.DEBUG === 'true') ||
                      (typeof window !== 'undefined' && localStorage.getItem('debug') === 'true');
     
     // Set log level from environment or default to INFO
-    this.logLevel = this.parseLogLevel(process.env.LOG_LEVEL) || LogLevel.INFO;
+    this.logLevel = this.parseLogLevel(typeof process !== 'undefined' ? process.env?.LOG_LEVEL : undefined) || LogLevel.INFO;
     
     // Parse enabled components from environment
+    const componentsFromEnv = typeof process !== 'undefined' ? process.env?.DEBUG_COMPONENTS : undefined;
     this.enabledComponents = new Set(
-      process.env.DEBUG_COMPONENTS?.split(',').map(c => c.trim()) || []
+      componentsFromEnv?.split(',').map(c => c.trim()) || []
     );
   }
 
