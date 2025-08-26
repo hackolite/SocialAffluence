@@ -8,7 +8,7 @@ const app = express();
 
 // --- AJOUT DE LA CONFIG CORS --- //
 app.use(cors({
-  origin: ['https://social-affluence.com', 'http://localhost:5000'], // prod & dev
+  origin: ['https://social-affluence.com', 'http://localhost:3000'], // prod & dev
   credentials: true
 }));
 // --- FIN AJOUT CONFIG CORS --- //
