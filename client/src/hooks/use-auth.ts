@@ -1,14 +1,6 @@
+// This is a temporary backup of the original useAuth hook
 import { useState, useEffect } from 'react';
-
-interface User {
-  id: number;
-  username: string;
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  avatar?: string;
-  googleId?: string;
-}
+import type { User } from '@/lib/user-utils';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);

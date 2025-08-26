@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell, Settings, User, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { getUserInitials, getUserDisplayName } from "@/lib/user-utils";
 
 export default function Header() {
   const [visible, setVisible] = useState(true);
   const headerRef = useRef(null);
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
     const handleClickTopZone = (e: MouseEvent) => {
@@ -71,9 +74,22 @@ export default function Header() {
             >
               <Settings className="h-5 w-5" />
             </Button>
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-white" />
-            </div>
+            {isAuthenticated && user && !isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <span className="text-xs font-medium text-white">
+                    {getUserInitials(user)}
+                  </span>
+                </div>
+                <span className="text-sm text-white hidden md:inline">
+                  {getUserDisplayName(user)}
+                </span>
+              </div>
+            ) : (
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-white" />
+              </div>
+            )}
           </div>
         </div>
       </div>
