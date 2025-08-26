@@ -9,11 +9,13 @@ import {
   Bell,
   Shield,
   Menu,
-  X
+  X,
+  LogOut
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
 import {
   Sidebar,
   SidebarContent,
@@ -29,12 +31,42 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NavigationItem {
   title: string;
   url: string;
   icon: React.ComponentType<any>;
   isActive?: boolean;
+}
+
+// Helper function to generate user initials
+function getUserInitials(user: any): string {
+  if (user?.firstName && user?.lastName) {
+    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+  }
+  if (user?.username) {
+    return user.username.substring(0, 2).toUpperCase();
+  }
+  return "U";
+}
+
+// Helper function to get user display name
+function getUserDisplayName(user: any): string {
+  if (user?.firstName && user?.lastName) {
+    return `${user.firstName} ${user.lastName}`;
+  }
+  if (user?.username) {
+    return user.username;
+  }
+  return "Utilisateur";
 }
 
 const navigationItems: NavigationItem[] = [
@@ -78,6 +110,12 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ children }: AppSidebarProps) {
+  const { user, isLoading, isAuthenticated, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <SidebarProvider>
       <Sidebar className="border-r border-slate-700">
@@ -145,18 +183,45 @@ export function AppSidebar({ children }: AppSidebarProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
+                {user?.avatar && (
+                  <AvatarImage src={user.avatar} alt={getUserDisplayName(user)} />
+                )}
                 <AvatarFallback className="bg-primary text-white text-sm">
-                  JD
+                  {isLoading ? "..." : getUserInitials(user)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-white">Jean Dupont</span>
+                <span className="text-sm font-medium text-white">
+                  {isLoading ? "Chargement..." : getUserDisplayName(user)}
+                </span>
                 <span className="text-xs text-slate-400">Abonnement Pro</span>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white">
-              <Settings className="h-4 w-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-700">
+                <DropdownMenuLabel className="text-white">Mon compte</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-slate-700" />
+                <DropdownMenuItem asChild>
+                  <a href="/settings" className="text-slate-300 hover:text-white">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Paramètres
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-slate-700" />
+                <DropdownMenuItem 
+                  onClick={handleLogout}
+                  className="text-slate-300 hover:text-white cursor-pointer"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Se déconnecter
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </SidebarFooter>
       </Sidebar>
@@ -171,11 +236,38 @@ export function AppSidebar({ children }: AppSidebarProps) {
               <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-white text-sm">
-                  JD
-                </AvatarFallback>
-              </Avatar>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    {user?.avatar && (
+                      <AvatarImage src={user.avatar} alt={getUserDisplayName(user)} />
+                    )}
+                    <AvatarFallback className="bg-primary text-white text-sm">
+                      {isLoading ? "..." : getUserInitials(user)}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-slate-800 border-slate-700">
+                  <DropdownMenuLabel className="text-white">
+                    {isLoading ? "Chargement..." : getUserDisplayName(user)}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-slate-700" />
+                  <DropdownMenuItem asChild>
+                    <a href="/settings" className="text-slate-300 hover:text-white">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Paramètres
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-slate-700" />
+                  <DropdownMenuItem 
+                    onClick={handleLogout}
+                    className="text-slate-300 hover:text-white cursor-pointer"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Se déconnecter
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>
@@ -195,6 +287,12 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {
+  const { user, isLoading, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -254,16 +352,32 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700">
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary text-white text-sm">
-                JD
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-white">Jean Dupont</span>
-              <span className="text-xs text-slate-400">Abonnement Pro</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-8 w-8">
+                {user?.avatar && (
+                  <AvatarImage src={user.avatar} alt={getUserDisplayName(user)} />
+                )}
+                <AvatarFallback className="bg-primary text-white text-sm">
+                  {isLoading ? "..." : getUserInitials(user)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-white">
+                  {isLoading ? "Chargement..." : getUserDisplayName(user)}
+                </span>
+                <span className="text-xs text-slate-400">Abonnement Pro</span>
+              </div>
             </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 text-slate-400 hover:text-white"
+              onClick={handleLogout}
+              title="Se déconnecter"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
