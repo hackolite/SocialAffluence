@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { DetectionCounts } from "@/pages/dashboard";
 import { useYoloDetection } from "@/hooks/use-yolo-detection";
+import { debugLogger, createDebugContext } from "@shared/debug-logger";
 
 interface DetectionBox {
   x: number;
@@ -52,6 +53,9 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   const [showControls, setShowControls] = useState<boolean>(true);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Debug context for this component
+  const debugContext = createDebugContext('CameraMonitoring');
+
   // YOLO detection hook
   const {
     detectObjects,
@@ -60,8 +64,26 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     error: yoloError,
   } = useYoloDetection();
 
+  debugLogger.debug(debugContext, 'Component initialized', {
+    initialState: { isActive, fps, selectedCamera, isFullscreen },
+    yoloState: { isModelLoaded, isProcessing, yoloError }
+  });
+
   const startCamera = useCallback(async (): Promise<void> => {
+    const cameraContext = { ...debugContext, operation: 'startCamera' };
+    debugLogger.info(cameraContext, 'Starting camera access');
+    
     try {
+      debugLogger.debug(cameraContext, 'Requesting media devices permission', {
+        constraints: {
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: "environment",
+          }
+        }
+      });
+      
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: 1280 },
@@ -70,46 +92,97 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
         },
       });
 
+      debugLogger.info(cameraContext, 'Camera stream obtained successfully', {
+        streamId: stream.id,
+        tracks: stream.getVideoTracks().map(track => ({
+          id: track.id,
+          label: track.label,
+          enabled: track.enabled,
+          settings: track.getSettings()
+        }))
+      });
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         setCameraError(null);
+        debugLogger.debug(cameraContext, 'Stream assigned to video element');
+      } else {
+        debugLogger.warn(cameraContext, 'Video ref not available when setting stream');
       }
     } catch (err) {
+      debugLogger.error(cameraContext, 'Camera access error', { error: err });
       console.error("Camera access error:", err);
       const error = err as Error;
-      setCameraError(
-        error.name === "NotAllowedError"
-          ? "Camera access denied. Please allow camera access."
-          : "Unable to access camera.",
-      );
+      const errorMessage = error.name === "NotAllowedError"
+        ? "Camera access denied. Please allow camera access."
+        : "Unable to access camera.";
+      setCameraError(errorMessage);
+      debugLogger.warn(cameraContext, 'Camera error set', { errorMessage, errorType: error.name });
     }
   }, []);
 
   const stopCamera = useCallback((): void => {
+    const cameraContext = { ...debugContext, operation: 'stopCamera' };
+    debugLogger.info(cameraContext, 'Stopping camera stream');
+    
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track: MediaStreamTrack) => {
+      const tracks = streamRef.current.getTracks();
+      debugLogger.debug(cameraContext, 'Stopping media tracks', { trackCount: tracks.length });
+      
+      tracks.forEach((track: MediaStreamTrack) => {
         track.stop();
+        debugLogger.trace(cameraContext, 'Track stopped', { trackId: track.id, label: track.label });
       });
       streamRef.current = null;
     }
 
     if (videoRef.current) {
       videoRef.current.srcObject = null;
+      debugLogger.debug(cameraContext, 'Video element source cleared');
     }
 
     setCameraError(null);
+    debugLogger.info(cameraContext, 'Camera stopped successfully');
   }, []);
 
   const runYoloDetection = useCallback(async (): Promise<void> => {
-    if (!videoRef.current) return;
+    const detectionContext = { ...debugContext, operation: 'runYoloDetection' };
+    
+    if (!videoRef.current) {
+      debugLogger.warn(detectionContext, 'No video reference available for detection');
+      return;
+    }
 
     const video = videoRef.current;
-    if (video.videoWidth === 0 || video.videoHeight === 0) return;
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      debugLogger.warn(detectionContext, 'Video dimensions invalid for detection', {
+        videoWidth: video.videoWidth,
+        videoHeight: video.videoHeight
+      });
+      return;
+    }
 
+    debugLogger.time(detectionContext, 'fullDetectionCycle');
+    
     try {
+      debugLogger.debug(detectionContext, 'Starting detection cycle', {
+        videoSize: { width: video.videoWidth, height: video.videoHeight },
+        currentTimestamp: new Date().toISOString()
+      });
+      
       const detectedBoxes = await detectObjects(video);
       setDetectionBoxes(detectedBoxes);
+
+      debugLogger.debug(detectionContext, 'Detection boxes received', {
+        boxCount: detectedBoxes.length,
+        boxes: detectedBoxes.map(box => ({
+          class: box.class,
+          confidence: box.confidence,
+          position: { x: box.x, y: box.y },
+          size: { width: box.width, height: box.height }
+        }))
+      });
 
       // Count detections by type
       let peopleCount = 0;
@@ -131,8 +204,16 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
         classCounts,
       };
 
+      debugLogger.info(detectionContext, 'Detection counts calculated', {
+        counts: newCounts,
+        classDistribution: Object.entries(classCounts).map(([cls, count]) => `${cls}: ${count}`)
+      });
+
       onDetectionUpdate(newCounts);
+      debugLogger.timeEnd(detectionContext, 'fullDetectionCycle');
     } catch (error) {
+      debugLogger.timeEnd(detectionContext, 'fullDetectionCycle');
+      debugLogger.error(detectionContext, 'YOLO detection error', { error });
       console.error("YOLO detection error:", error);
     }
   }, [detectObjects, onDetectionUpdate]);

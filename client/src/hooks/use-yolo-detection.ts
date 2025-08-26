@@ -3,6 +3,7 @@ import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-cpu';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import { debugLogger, createDebugContext } from "@shared/debug-logger";
 
 interface DetectionBox {
   x: number;
@@ -47,26 +48,48 @@ export function useYoloDetection() {
   const [error, setError] = useState<string | null>(null);
   const modelRef = useRef<cocoSsd.ObjectDetection | null>(null);
 
+  // Debug context for this component
+  const debugContext = createDebugContext('useYoloDetection');
+
+  debugLogger.debug(debugContext, 'Hook initialized', {
+    initialState: { isModelLoaded, isProcessing, error }
+  });
+
   // Load SSDLite MobileNetV2 model
   useEffect(() => {
     const loadModel = async () => {
+      const loadContext = { ...debugContext, operation: 'loadModel' };
+      debugLogger.time(loadContext, 'modelLoad');
+      
       try {
+        debugLogger.info(loadContext, 'Starting SSDLite MobileNetV2 model loading');
         console.log('Loading SSDLite MobileNetV2 model...');
         setError(null);
         
         // Initialize TensorFlow.js backend with fallback
         try {
+          debugLogger.debug(loadContext, 'Setting TensorFlow.js WebGL backend');
           await tf.setBackend('webgl');
           await tf.ready();
+          debugLogger.info(loadContext, 'TensorFlow.js WebGL backend ready', {
+            backend: tf.getBackend(),
+            memory: tf.memory()
+          });
           console.log('TensorFlow.js WebGL backend ready');
         } catch (webglError) {
+          debugLogger.warn(loadContext, 'WebGL backend failed, falling back to CPU', { error: webglError });
           console.warn('WebGL backend failed, falling back to CPU:', webglError);
           await tf.setBackend('cpu');
           await tf.ready();
+          debugLogger.info(loadContext, 'TensorFlow.js CPU backend ready', {
+            backend: tf.getBackend(),
+            memory: tf.memory()
+          });
           console.log('TensorFlow.js CPU backend ready');
         }
         
         // Load COCO-SSD with SSDLite MobileNetV2 backbone
+        debugLogger.debug(loadContext, 'Loading COCO-SSD model with SSDLite MobileNetV2');
         const loadedModel = await cocoSsd.load({
           base: 'lite_mobilenet_v2' // This uses SSDLite MobileNetV2
         });
@@ -74,9 +97,20 @@ export function useYoloDetection() {
         modelRef.current = loadedModel;
         setModel(loadedModel);
         setIsModelLoaded(true);
+        
+        debugLogger.timeEnd(loadContext, 'modelLoad');
+        debugLogger.info(loadContext, 'SSDLite MobileNetV2 model loaded successfully', {
+          modelInfo: {
+            base: 'lite_mobilenet_v2',
+            backend: tf.getBackend(),
+            memory: tf.memory()
+          }
+        });
         console.log('SSDLite MobileNetV2 model loaded successfully');
         
       } catch (err) {
+        debugLogger.timeEnd(loadContext, 'modelLoad');
+        debugLogger.error(loadContext, 'Error loading SSDLite MobileNetV2 model', { error: err });
         console.error('Error loading SSDLite MobileNetV2 model:', err);
         setError('Failed to load SSDLite MobileNetV2 model. Using fallback detection.');
         setIsModelLoaded(true); // Allow fallback mode
@@ -86,6 +120,7 @@ export function useYoloDetection() {
     loadModel();
 
     return () => {
+      debugLogger.debug(debugContext, 'Cleaning up model on unmount');
       // COCO-SSD models don't need manual disposal
       modelRef.current = null;
     };
@@ -95,6 +130,12 @@ export function useYoloDetection() {
   // Non-Maximum Suppression to remove overlapping detections
   
   const applyNMS = useCallback((boxes: DetectionBox[], threshold = 0.3): DetectionBox[] => {
+    const nmsContext = { ...debugContext, operation: 'applyNMS' };
+    debugLogger.debug(nmsContext, 'Starting Non-Maximum Suppression', {
+      inputBoxes: boxes.length,
+      threshold
+    });
+    
     // Sort by confidence
     boxes.sort((a, b) => b.confidence - a.confidence);
     
@@ -104,11 +145,25 @@ export function useYoloDetection() {
       const current = boxes.shift()!;
       keep.push(current);
       
+      const beforeFilterCount = boxes.length;
       boxes = boxes.filter(box => {
         const iou = calculateIoU(current, box);
         return iou <= threshold;
       });
+      
+      const suppressed = beforeFilterCount - boxes.length;
+      if (suppressed > 0) {
+        debugLogger.trace(nmsContext, 'Suppressed overlapping boxes', {
+          currentBox: current,
+          suppressedCount: suppressed
+        });
+      }
     }
+    
+    debugLogger.debug(nmsContext, 'NMS completed', {
+      outputBoxes: keep.length,
+      suppressionRatio: `${keep.length}/${boxes.length + keep.length}`
+    });
     
     return keep;
   }, []);
@@ -132,6 +187,11 @@ export function useYoloDetection() {
 
   // Fallback detection for demonstration when model isn't available
   const fallbackDetection = useCallback((imageWidth: number, imageHeight: number): DetectionBox[] => {
+    const fallbackContext = { ...debugContext, operation: 'fallbackDetection' };
+    debugLogger.warn(fallbackContext, 'Using fallback detection mode', {
+      imageSize: { width: imageWidth, height: imageHeight }
+    });
+    
     const boxes: DetectionBox[] = [];
     const numDetections = Math.floor(Math.random() * 4) + 1;
     
@@ -150,24 +210,53 @@ export function useYoloDetection() {
       });
     }
     
+    debugLogger.debug(fallbackContext, 'Generated fallback detections', {
+      detectionCount: boxes.length,
+      detections: boxes
+    });
+    
     return boxes;
   }, []);
 
   // Detect objects in video frame using SSDLite MobileNetV2
   const detectObjects = useCallback(async (videoElement: HTMLVideoElement): Promise<DetectionBox[]> => {
+    const detectContext = { ...debugContext, operation: 'detectObjects' };
+    
     if (!videoElement || videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
+      debugLogger.warn(detectContext, 'Invalid video element for detection', {
+        hasVideoElement: !!videoElement,
+        videoWidth: videoElement?.videoWidth,
+        videoHeight: videoElement?.videoHeight
+      });
       return [];
     }
 
     setIsProcessing(true);
+    debugLogger.time(detectContext, 'detection');
     
     try {
       const imageWidth = videoElement.videoWidth;
       const imageHeight = videoElement.videoHeight;
       
+      debugLogger.debug(detectContext, 'Starting object detection', {
+        imageSize: { width: imageWidth, height: imageHeight },
+        modelState: { isModelLoaded, hasModel: !!model, hasError: !!error }
+      });
+      
       if (model && isModelLoaded && !error) {
+        debugLogger.debug(detectContext, 'Using real SSDLite MobileNetV2 detection');
+        
         // Real SSDLite MobileNetV2 detection using COCO-SSD API
         const predictions = await model.detect(videoElement);
+        
+        debugLogger.debug(detectContext, 'Raw model predictions received', {
+          predictionCount: predictions.length,
+          predictions: predictions.map(p => ({
+            class: p.class,
+            score: p.score,
+            bbox: p.bbox
+          }))
+        });
         
         // Convert COCO-SSD predictions to our DetectionBox format
         const boxes: DetectionBox[] = predictions.map(prediction => {
@@ -187,12 +276,31 @@ export function useYoloDetection() {
           };
         });
         
+        debugLogger.debug(detectContext, 'Converted predictions to detection boxes', {
+          boxCount: boxes.length,
+          classDistribution: boxes.reduce((acc, box) => {
+            acc[box.class] = (acc[box.class] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>)
+        });
+        
+        debugLogger.timeEnd(detectContext, 'detection');
         return boxes;
       } else {
+        debugLogger.debug(detectContext, 'Model not available, using fallback detection', {
+          modelLoaded: isModelLoaded,
+          hasModel: !!model,
+          error
+        });
+        
         // Fallback detection for demonstration
-        return fallbackDetection(imageWidth, imageHeight);
+        const result = fallbackDetection(imageWidth, imageHeight);
+        debugLogger.timeEnd(detectContext, 'detection');
+        return result;
       }
     } catch (err) {
+      debugLogger.timeEnd(detectContext, 'detection');
+      debugLogger.error(detectContext, 'Error during SSDLite MobileNetV2 detection', { error: err });
       console.error('Error during SSDLite MobileNetV2 detection:', err);
       setError('SSDLite MobileNetV2 detection failed. Using fallback mode.');
       return fallbackDetection(videoElement.videoWidth, videoElement.videoHeight);
