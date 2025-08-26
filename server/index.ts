@@ -5,6 +5,15 @@ import { setupVite, serveStatic, log } from "./vite";
 import { debugLogger, createDebugContext } from "../shared/debug-logger";
 
 const app = express();
+
+// --- AJOUT DE LA CONFIG CORS --- //
+app.use(cors({
+  origin: ['https://social-affluence.com', 'http://localhost:3000'], // prod & dev
+  credentials: true
+}));
+// --- FIN AJOUT CONFIG CORS --- //
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
