@@ -3,7 +3,10 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import session from "express-session";
 import { passport } from "./auth";
+import { saveLoginEvent } from "./db";
+import { debugLogger, createDebugContext } from "@shared/debug-logger";
 
+const debugContext = createDebugContext('Routes');
 let wss: WebSocketServer;
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -34,9 +37,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     app.get('/auth/google/callback',
       passport.authenticate('google', { failureRedirect: '/login?error=google_auth_failed' }),
-      (req, res) => {
-        // Successful authentication, redirect to dashboard
-        res.redirect('/dashboard');
+      async (req, res) => {
+        try {
+          // Get user IP address
+          const userIP = (req.headers['x-forwarded-for'] as string) || 
+                        (req.headers['x-real-ip'] as string) || 
+                        req.connection.remoteAddress || 
+                        req.socket.remoteAddress || 
+                        'unknown';
+
+          // Extract user information for logging
+          const user = req.user as any;
+          if (user && user.googleId) {
+            // Save login event to database
+            await saveLoginEvent({
+              googleId: user.googleId,
+              name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
+              email: user.email,
+              ip: userIP
+            });
+          }
+
+          debugLogger.info(debugContext, 'Google OAuth login successful', {
+            userId: user?.id,
+            googleId: user?.googleId,
+            email: user?.email,
+            ip: userIP
+          });
+
+          // Successful authentication, redirect to dashboard
+          res.redirect('/dashboard');
+        } catch (error) {
+          debugLogger.error(debugContext, 'Error in Google OAuth callback', { error });
+          console.error('❌ Error in Google OAuth callback:', error);
+          // Still redirect to dashboard even if logging fails
+          res.redirect('/dashboard');
+        }
       }
     );
   } else {
