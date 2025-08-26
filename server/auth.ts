@@ -66,19 +66,7 @@ passport.use(new LocalStrategy(async (username, password, done) => {
   }
 }));
 
-// Serialize user for session
-passport.serializeUser((user: any, done) => {
-  done(null, user.id);
-});
-
-// Deserialize user from session
-passport.deserializeUser(async (id: number, done) => {
-  try {
-    const user = await storage.getUser(id);
-    done(null, user);
-  } catch (error) {
-    done(error, undefined);
-  }
-});
+// Note: Passport session serialization/deserialization removed
+// Authentication now uses secure cookies with username instead of sessions
 
 export { passport };

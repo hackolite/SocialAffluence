@@ -1,4 +1,4 @@
-// This is a temporary backup of the original useAuth hook
+// Cookie-based authentication hook
 import { useState, useEffect } from 'react';
 import type { User } from '@/lib/user-utils';
 import { debugLogger, createDebugContext } from "@shared/debug-logger";
@@ -24,7 +24,9 @@ export function useAuth() {
     debugLogger.debug(authContext, 'Starting authentication status check');
     
     try {
-      debugLogger.debug(authContext, 'Fetching auth status from API');
+      // Call the API to check authentication status
+      // The server will read the HttpOnly username cookie and validate the user
+      debugLogger.debug(authContext, 'Fetching user data from API');
       const response = await fetch('/api/auth/user', {
         credentials: 'include',
       });
@@ -77,6 +79,8 @@ export function useAuth() {
         method: 'POST',
         credentials: 'include',
       });
+      
+      debugLogger.debug(logoutContext, 'Logout API call completed');
       
       setUser(null);
       setIsAuthenticated(false);
