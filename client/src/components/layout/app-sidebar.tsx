@@ -31,6 +31,7 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +40,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 
 interface NavigationItem {
   title: string;
@@ -110,11 +112,13 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ children }: AppSidebarProps) {
+
   const { user, isLoading, isAuthenticated, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
   };
+
 
   return (
     <SidebarProvider>
@@ -180,6 +184,7 @@ export function AppSidebar({ children }: AppSidebarProps) {
         </SidebarContent>
 
         <SidebarFooter className="border-t border-slate-700 p-4">
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
@@ -195,8 +200,13 @@ export function AppSidebar({ children }: AppSidebarProps) {
                   {isLoading ? "Chargement..." : getUserDisplayName(user)}
                 </span>
                 <span className="text-xs text-slate-400">Abonnement Pro</span>
+
               </div>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white">
+                <Settings className="h-4 w-4" />
+              </Button>
             </div>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white">
@@ -223,6 +233,7 @@ export function AppSidebar({ children }: AppSidebarProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
         </SidebarFooter>
       </Sidebar>
 
@@ -236,6 +247,7 @@ export function AppSidebar({ children }: AppSidebarProps) {
               <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
                 <Bell className="h-5 w-5" />
               </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Avatar className="h-8 w-8 cursor-pointer">
@@ -268,6 +280,7 @@ export function AppSidebar({ children }: AppSidebarProps) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
             </div>
           </div>
         </header>
@@ -287,11 +300,13 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {
+
   const { user, isLoading, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
   };
+
 
   if (!isOpen) return null;
 
@@ -352,6 +367,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700">
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
