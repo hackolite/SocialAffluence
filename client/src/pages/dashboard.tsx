@@ -6,6 +6,7 @@ import AnalyticsDashboard from "@/components/dashboard/analytics-dashboard";
 import RecentAlerts from "@/components/dashboard/recent-alerts";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { startOfMinute, addMinutes } from "date-fns";
+import { debugLogger, createDebugContext } from "@shared/debug-logger";
 
 export interface DetectionCounts {
   total: number;
@@ -57,42 +58,124 @@ export default function Dashboard() {
     startOfMinute(new Date()).getTime()
   );
 
+  // Debug context for dashboard
+  const debugContext = createDebugContext('Dashboard');
+
+  debugLogger.debug(debugContext, 'Dashboard component initialized', {
+    initialState: {
+      detectionCounts,
+      systemStatus,
+      totalDetections,
+      peopleDetected
+    }
+  });
+
   const { socket, isConnected } = useWebSocket();
 
   useEffect(() => {
+    const wsContext = { ...debugContext, operation: 'websocketHandler' };
+    debugLogger.debug(wsContext, 'WebSocket effect triggered', { 
+      hasSocket: !!socket, 
+      isConnected 
+    });
+    
     if (!socket) return;
+    
     const handleMessage = (event: MessageEvent) => {
+      const msgContext = { ...wsContext, operation: 'handleMessage' };
+      debugLogger.trace(msgContext, 'WebSocket message received', { 
+        rawData: event.data 
+      });
+      
       try {
         const data = JSON.parse(event.data);
+        debugLogger.debug(msgContext, 'WebSocket message parsed', { 
+          messageType: data.type,
+          data 
+        });
+        
         if (data.type === "detection_update") {
+          debugLogger.info(msgContext, 'Processing detection update', { counts: data.counts });
           handleDetectionUpdate(data.counts);
         } else if (data.type === "system_status") {
+          debugLogger.info(msgContext, 'Processing system status update', { status: data.status });
           setSystemStatus(data.status);
         } else if (data.type === "total_metrics") {
+          debugLogger.info(msgContext, 'Processing total metrics update', { 
+            total: data.total, 
+            people: data.people 
+          });
           setTotalDetections(data.total);
           setPeopleDetected(data.people);
+        } else {
+          debugLogger.warn(msgContext, 'Unknown message type received', { type: data.type });
         }
       } catch (error) {
+        debugLogger.error(msgContext, 'WebSocket message parsing error', { error });
         console.error("WebSocket message parsing error:", error);
       }
     };
+    
     socket.addEventListener("message", handleMessage);
-    return () => socket.removeEventListener("message", handleMessage);
+    debugLogger.debug(wsContext, 'WebSocket message listener added');
+    
+    return () => {
+      socket.removeEventListener("message", handleMessage);
+      debugLogger.debug(wsContext, 'WebSocket message listener removed');
+    };
   }, [socket]);
 
   const handleDetectionUpdate = (counts: DetectionCounts) => {
-    if (counts.total <= 0) return;
+    const updateContext = { ...debugContext, operation: 'handleDetectionUpdate' };
+    debugLogger.debug(updateContext, 'Starting detection update', { inputCounts: counts });
+    
+    if (counts.total <= 0) {
+      debugLogger.warn(updateContext, 'Ignoring detection update with zero total count', { counts });
+      return;
+    }
 
     setDetectionCounts(counts);
-    setTotalDetections((prev) => prev + counts.total);
-    setPeopleDetected((prev) => prev + counts.people);
+    
+    setTotalDetections((prev) => {
+      const newTotal = prev + counts.total;
+      debugLogger.trace(updateContext, 'Updated total detections', { 
+        previous: prev, 
+        increment: counts.total, 
+        new: newTotal 
+      });
+      return newTotal;
+    });
+    
+    setPeopleDetected((prev) => {
+      const newPeople = prev + counts.people;
+      debugLogger.trace(updateContext, 'Updated people count', { 
+        previous: prev, 
+        increment: counts.people, 
+        new: newPeople 
+      });
+      return newPeople;
+    });
 
     setCumulativeClassCounts((prev) => {
       const updated = { ...prev };
       for (const className in counts.classCounts) {
-        updated[className] =
-          (updated[className] || 0) + counts.classCounts[className];
+        const previousCount = updated[className] || 0;
+        const increment = counts.classCounts[className];
+        updated[className] = previousCount + increment;
+        
+        debugLogger.trace(updateContext, 'Updated class count', { 
+          className, 
+          previous: previousCount, 
+          increment, 
+          new: updated[className] 
+        });
       }
+      
+      debugLogger.debug(updateContext, 'Cumulative class counts updated', { 
+        previousCounts: prev,
+        newCounts: updated 
+      });
+      
       return updated;
     });
 
