@@ -19,11 +19,12 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.currentId = 1;
     
-    // Add a test user for demonstration
+    // Add a test user for demonstration (remove in production)
     this.createTestUser();
   }
 
   private async createTestUser() {
+    // TODO: Remove this test user in production
     const testUser: User = {
       id: this.currentId++,
       username: "testuser",
