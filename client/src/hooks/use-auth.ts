@@ -1,6 +1,7 @@
-// This is a temporary backup of the original useAuth hook
+// Cookie-based authentication hook
 import { useState, useEffect } from 'react';
 import type { User } from '@/lib/user-utils';
+import { getCookie, deleteCookie } from '@/lib/utils';
 import { debugLogger, createDebugContext } from "@shared/debug-logger";
 
 export function useAuth() {
@@ -24,7 +25,22 @@ export function useAuth() {
     debugLogger.debug(authContext, 'Starting authentication status check');
     
     try {
-      debugLogger.debug(authContext, 'Fetching auth status from API');
+      // First check if username cookie exists
+      const usernameCookie = getCookie('username');
+      debugLogger.debug(authContext, 'Checking username cookie', {
+        hasCookie: !!usernameCookie,
+        username: usernameCookie ? '[REDACTED]' : null
+      });
+
+      if (!usernameCookie) {
+        debugLogger.debug(authContext, 'No username cookie found, user not authenticated');
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+
+      debugLogger.debug(authContext, 'Username cookie found, fetching user data from API');
       const response = await fetch('/api/auth/user', {
         credentials: 'include',
       });
@@ -45,10 +61,12 @@ export function useAuth() {
         setUser(userData);
         setIsAuthenticated(true);
       } else {
-        debugLogger.warn(authContext, 'User not authenticated', {
+        debugLogger.warn(authContext, 'User not authenticated or invalid cookie', {
           status: response.status,
           statusText: response.statusText
         });
+        // Clear invalid cookie
+        deleteCookie('username');
         setUser(null);
         setIsAuthenticated(false);
       }
@@ -77,6 +95,10 @@ export function useAuth() {
         method: 'POST',
         credentials: 'include',
       });
+      
+      // Clear the username cookie client-side as well
+      deleteCookie('username');
+      debugLogger.debug(logoutContext, 'Username cookie cleared client-side');
       
       setUser(null);
       setIsAuthenticated(false);
