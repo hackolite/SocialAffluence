@@ -1,7 +1,6 @@
 // Cookie-based authentication hook
 import { useState, useEffect } from 'react';
 import type { User } from '@/lib/user-utils';
-import { getCookie, deleteCookie } from '@/lib/utils';
 import { debugLogger, createDebugContext } from "@shared/debug-logger";
 
 export function useAuth() {
@@ -25,22 +24,9 @@ export function useAuth() {
     debugLogger.debug(authContext, 'Starting authentication status check');
     
     try {
-      // First check if username cookie exists
-      const usernameCookie = getCookie('username');
-      debugLogger.debug(authContext, 'Checking username cookie', {
-        hasCookie: !!usernameCookie,
-        username: usernameCookie ? '[REDACTED]' : null
-      });
-
-      if (!usernameCookie) {
-        debugLogger.debug(authContext, 'No username cookie found, user not authenticated');
-        setUser(null);
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        return;
-      }
-
-      debugLogger.debug(authContext, 'Username cookie found, fetching user data from API');
+      // Call the API to check authentication status
+      // The server will read the HttpOnly username cookie and validate the user
+      debugLogger.debug(authContext, 'Fetching user data from API');
       const response = await fetch('/api/auth/user', {
         credentials: 'include',
       });
@@ -61,12 +47,10 @@ export function useAuth() {
         setUser(userData);
         setIsAuthenticated(true);
       } else {
-        debugLogger.warn(authContext, 'User not authenticated or invalid cookie', {
+        debugLogger.warn(authContext, 'User not authenticated', {
           status: response.status,
           statusText: response.statusText
         });
-        // Clear invalid cookie
-        deleteCookie('username');
         setUser(null);
         setIsAuthenticated(false);
       }
@@ -96,9 +80,7 @@ export function useAuth() {
         credentials: 'include',
       });
       
-      // Clear the username cookie client-side as well
-      deleteCookie('username');
-      debugLogger.debug(logoutContext, 'Username cookie cleared client-side');
+      debugLogger.debug(logoutContext, 'Logout API call completed');
       
       setUser(null);
       setIsAuthenticated(false);
