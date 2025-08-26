@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser } from "@shared/schema";
+import { users, logins, type User, type InsertUser, type Login, type InsertLogin } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -9,6 +9,9 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  // Login tracking methods (for future PostgreSQL implementation)
+  saveLogin?(login: InsertLogin): Promise<Login>;
+  getLoginsByGoogleId?(googleId: string): Promise<Login[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -44,7 +47,16 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      id,
+      username: insertUser.username,
+      email: insertUser.email ?? null,
+      password: insertUser.password ?? null,
+      firstName: insertUser.firstName ?? null,
+      lastName: insertUser.lastName ?? null,
+      googleId: insertUser.googleId ?? null,
+      avatar: insertUser.avatar ?? null,
+    };
     this.users.set(id, user);
     return user;
   }
