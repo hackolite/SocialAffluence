@@ -1,3 +1,4 @@
+// This is a temporary backup of the original useAuth hook
 import { useState, useEffect } from 'react';
 import type { User } from '@/lib/user-utils';
 
