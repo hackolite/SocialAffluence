@@ -1,0 +1,104 @@
+{
+  "navigation": {
+    "skipToMainContent": "Skip to main content",
+    "mainNavigation": "Main navigation",
+    "features": "Features",
+    "pricing": "Pricing",
+    "about": "About",
+    "login": "Login",
+    "backToHome": "Back to home"
+  },
+  "hero": {
+    "title": "Monitor crowd flow in",
+    "titleHighlight": "real time",
+    "description": "Analyze people flow with our advanced AI. Get accurate insights to optimize your spaces and improve customer experience.",
+    "startFree": "Start for free",
+    "viewDemo": "View demo",
+    "startFreeDescription": "Create a free account to start analyzing crowd flow",
+    "viewDemoDescription": "Discover features with an interactive demonstration",
+    "dashboardPreview": "Dashboard preview"
+  },
+  "examples": {
+    "title": "Object detection in real-world conditions",
+    "carouselLabel": "Real-world application examples",
+    "urbanAnalysis": {
+      "title": "Urban crowd flow analysis",
+      "description": "Our real-time counting and analysis solution transforms urban flow management into a true lever for efficiency and quality of life. Through advanced detection algorithms and AI, we provide accurate data on density (as heatmap - coming soon) and people movement in public spaces, shops, stations, transport, and event areas."
+    },
+    "storeAnalysis": {
+      "title": "Advanced behavioral analysis in stores",
+      "description": "By providing accurate data on the number of customers, their distribution and their journey inside the store, teams can optimize aisle layout, improve customer service and adapt resources according to activity peaks. This information also allows measuring the impact of promotions, anticipating flows and creating a smoother and more satisfying customer experience."
+    },
+    "portManagement": {
+      "title": "Smart management of port, marina or commercial zones",
+      "description": "By providing accurate data on the number of vessels, their position, rotation and dwell time, operators can optimize loading and unloading schedules, reduce waiting times and improve operational flow."
+    },
+    "previousExample": "Previous example",
+    "nextExample": "Next example"
+  },
+  "features": {
+    "title": "Why choose SocialAffluence?",
+    "description": "Our platform combines artificial intelligence and real-time analysis to offer you unprecedented insights.",
+    "aiPrecision": {
+      "title": "AI Precision",
+      "description": "Advanced detection powered by TensorFlow with 95%+ accuracy to identify people and vehicles."
+    },
+    "realTime": {
+      "title": "Real Time",
+      "description": "Live monitoring with instant metric updates and automatic alerts."
+    },
+    "fullHistory": {
+      "title": "Complete History",
+      "description": "Analyze trends by day, week or month with interactive charts and CSV/PDF exports."
+    },
+    "multiCamera": {
+      "title": "Multi-Camera",
+      "description": "Manage multiple cameras simultaneously with zone filtering and centralized overview."
+    },
+    "secure": {
+      "title": "Secure",
+      "description": "Encrypted data, GDPR compliance and secure storage with multi-factor authentication."
+    },
+    "zeroInstall": {
+      "title": "Zero Installation",
+      "description": "Everything works directly on your phone, no complex configuration required. Start in seconds!"
+    }
+  },
+  "about": {
+    "title": "Cutting-edge technology for crowd flow analysis",
+    "description": "SocialAffluence uses the latest advances in artificial intelligence and computer vision to analyze people flow in real time.",
+    "features": {
+      "aiAlgorithms": "Optimized TensorFlow AI algorithms",
+      "onDeviceArchitecture": "On-device architecture",
+      "nosqlStorage": "NoSQL storage for integrations",
+      "realTimeDashboards": "Real-time dashboards"
+    },
+    "performanceStats": "Performance statistics",
+    "detectionAccuracy": "Detection accuracy",
+    "satisfactionRating": "5-star satisfaction rating"
+  },
+  "cta": {
+    "title": "Ready to optimize your space?",
+    "description": "Join hundreds of companies who trust SocialAffluence to analyze their crowd flow.",
+    "startNow": "Start now",
+    "startNowDescription": "Create your account to start crowd flow analysis today"
+  },
+  "footer": {
+    "copyright": "© 2024 SocialAffluence. All rights reserved."
+  },
+  "pricing": {
+    "title": "Pricing",
+    "titleHighlight": "transparent",
+    "description": "Choose the plan that fits your needs. No hidden fees, cancel anytime.",
+    "oneShot": {
+      "badge": "One-time",
+      "title": "One-Shot Analysis",
+      "description": "Perfect for events or one-time analyses",
+      "price": "$5",
+      "priceUnit": "per analysis"
+    },
+    "faq": {
+      "title": "Frequently asked questions"
+    }
+  }
+}

@@ -2,8 +2,12 @@ import { ArrowRight, Eye, Clock, BarChart3, Shield, Users, Zap, CheckCircle, Sta
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Landing() {
+  const { t } = useTranslation();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800">
       {/* Skip Link for Accessibility */}
@@ -11,7 +15,7 @@ export default function Landing() {
         href="#main-content" 
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-md z-50 focus:z-50"
       >
-        Aller au contenu principal
+        {t('navigation.skipToMainContent')}
       </a>
       
       {/* Header */}
@@ -24,18 +28,19 @@ export default function Landing() {
               </div>
               <span className="text-xl font-bold text-white">SocialAffluence</span>
             </div>
-            <nav className="hidden md:flex items-center space-x-6" role="navigation" aria-label="Navigation principale">
+            <nav className="hidden md:flex items-center space-x-6" role="navigation" aria-label={t('navigation.mainNavigation')}>
               <a href="#features" className="text-slate-400 hover:text-white transition-colors">
-                Fonctionnalités
+                {t('navigation.features')}
               </a>
               <a href="/pricing" className="text-slate-400 hover:text-white transition-colors">
-                Tarifs
+                {t('navigation.pricing')}
               </a>
               <a href="#about" className="text-slate-400 hover:text-white transition-colors">
-                À propos
+                {t('navigation.about')}
               </a>
+              <LanguageSwitcher />
               <Button className="gradient-primary hover:opacity-90" asChild>
-                <a href="/login">Se connecter</a>
+                <a href="/login">{t('navigation.login')}</a>
               </Button>
             </nav>
           </div>
@@ -51,30 +56,29 @@ export default function Landing() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="text-center lg:text-left">
                 <h1 id="hero-heading" className="text-4xl md:text-6xl font-bold text-white mb-6">
-                  Surveillez l'affluence en{" "}
-                  <span className="gradient-text">temps réel</span>
+                  {t('hero.title')}{" "}
+                  <span className="gradient-text">{t('hero.titleHighlight')}</span>
                 </h1>
                 <p className="text-xl text-slate-300 mb-8">
-                  Analysez le flux de personnes avec notre IA avancée. Obtenez des insights précis 
-                  pour optimiser vos espaces et améliorer l'expérience client.
+                  {t('hero.description')}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start" role="group" aria-label="Actions principales">
                   <Button size="lg" className="gradient-primary hover:opacity-90" asChild>
                     <a href="/signup" aria-describedby="signup-description">
-                      Commencer gratuitement
+                      {t('hero.startFree')}
                       <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                     </a>
                   </Button>
-                  <span id="signup-description" className="sr-only">Créer un compte gratuit pour commencer à analyser l'affluence</span>
+                  <span id="signup-description" className="sr-only">{t('hero.startFreeDescription')}</span>
                   <Button size="lg" variant="outline" className="border-slate-600 text-white hover:bg-slate-800" asChild>
                     <a href="/dashboard" aria-describedby="demo-description">
-                      Voir la démo
+                      {t('hero.viewDemo')}
                     </a>
                   </Button>
-                  <span id="demo-description" className="sr-only">Découvrir les fonctionnalités avec une démonstration interactive</span>
+                  <span id="demo-description" className="sr-only">{t('hero.viewDemoDescription')}</span>
                 </div>
               </div>
-              <aside className="flex justify-center lg:justify-end" aria-label="Aperçu du tableau de bord">
+              <aside className="flex justify-center lg:justify-end" aria-label={t('hero.dashboardPreview')}>
                 <div className="glass rounded-lg p-4 border border-slate-700">
                   <img 
                     src="/img/demo-affluence.svg" 
@@ -92,14 +96,14 @@ export default function Landing() {
           <div className="container mx-auto">
             <header className="text-center mb-12">
               <h2 id="examples-heading" className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Détection d'objets en conditions réelles
+                {t('examples.title')}
               </h2>
               <p className="text-slate-300 text-lg max-w-3xl mx-auto">
               </p>
             </header>
 
             <div className="w-full">
-              <Carousel className="w-full" aria-label="Exemples d'applications en conditions réelles">
+              <Carousel className="w-full" aria-label={t('examples.carouselLabel')}>
                 <CarouselContent>
                   <CarouselItem>
                     <article className="glass rounded-lg overflow-hidden border border-slate-700">
@@ -110,7 +114,7 @@ export default function Landing() {
                       />
                       <div className="p-6">
                         <h3 className="text-xl font-semibold text-white mb-2">
-                          Analyse de l'affluence en milieu urbain
+                          {t('examples.urbanAnalysis.title')}
                         </h3>
                         <p className="text-slate-300">
                         Notre solution de comptage et d’analyse en temps réel permet de transformer la gestion des flux urbains en un véritable levier d’efficacité et de qualité de vie. 

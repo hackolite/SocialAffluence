@@ -1,0 +1,104 @@
+{
+  "navigation": {
+    "skipToMainContent": "Aller au contenu principal",
+    "mainNavigation": "Navigation principale",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "about": "À propos",
+    "login": "Se connecter",
+    "backToHome": "Retour à l'accueil"
+  },
+  "hero": {
+    "title": "Surveillez l'affluence en",
+    "titleHighlight": "temps réel",
+    "description": "Analysez le flux de personnes avec notre IA avancée. Obtenez des insights précis pour optimiser vos espaces et améliorer l'expérience client.",
+    "startFree": "Commencer gratuitement",
+    "viewDemo": "Voir la démo",
+    "startFreeDescription": "Créer un compte gratuit pour commencer à analyser l'affluence",
+    "viewDemoDescription": "Découvrir les fonctionnalités avec une démonstration interactive",
+    "dashboardPreview": "Aperçu du tableau de bord"
+  },
+  "examples": {
+    "title": "Détection d'objets en conditions réelles",
+    "carouselLabel": "Exemples d'applications en conditions réelles",
+    "urbanAnalysis": {
+      "title": "Analyse de l'affluence en milieu urbain",
+      "description": "Notre solution de comptage et d'analyse en temps réel permet de transformer la gestion des flux urbains en un véritable levier d'efficacité et de qualité de vie. Grâce à des algorithmes avancés de détection et d'IA, nous fournissons des données précises sur la densité (sous forme de heatmap- à venir) et les déplacements des personnes dans les espaces publics, commerces, gares, transports, et zones événementielles."
+    },
+    "storeAnalysis": {
+      "title": "Analyse comportementale avancée en magasin",
+      "description": "En fournissant des données précises sur le nombre de clients, leur répartition et leur parcours à l'intérieur du magasin, les équipes peuvent optimiser l'agencement des rayons, améliorer le service client et adapter les ressources en fonction des pics d'activité. Ces informations permettent également de mesurer l'impact des promotions, d'anticiper les flux et de créer une expérience client plus fluide et satisfaisante."
+    },
+    "portManagement": {
+      "title": "Gestion intelligente des zones portuaire, plaisance ou commerce",
+      "description": "En fournissant des données précises sur le nombre de navires, leur position, leur rotation et leur temps de séjour, les opérateurs peuvent optimiser le planning de déchargement et de chargement, réduire les temps d'attente et améliorer la fluidité des opérations."
+    },
+    "previousExample": "Exemple précédent",
+    "nextExample": "Exemple suivant"
+  },
+  "features": {
+    "title": "Pourquoi choisir SocialAffluence ?",
+    "description": "Notre plateforme combine l'intelligence artificielle et l'analyse temps réel pour vous offrir des insights sans précédent.",
+    "aiPrecision": {
+      "title": "IA de Précision",
+      "description": "Détection avancée alimentée par TensorFlow avec une précision de 95%+ pour identifier personnes et véhicules."
+    },
+    "realTime": {
+      "title": "Temps Réel",
+      "description": "Monitoring en direct avec mise à jour instantanée des métriques et alertes automatiques."
+    },
+    "fullHistory": {
+      "title": "Historique Complet",
+      "description": "Analysez les tendances par jour, semaine ou mois avec des graphiques interactifs et exports CSV/PDF."
+    },
+    "multiCamera": {
+      "title": "Multi-Caméras",
+      "description": "Gérez plusieurs caméras simultanément avec filtrage par zone et vue d'ensemble centralisée."
+    },
+    "secure": {
+      "title": "Sécurisé",
+      "description": "Données chiffrées, conformité RGPD et stockage sécurisé avec authentification multi-facteurs."
+    },
+    "zeroInstall": {
+      "title": "Zéro Installation",
+      "description": "Tout fonctionne directement sur votre téléphone, aucune configuration complexe requise. Démarrez en quelques secondes !"
+    }
+  },
+  "about": {
+    "title": "Technologie de pointe pour l'analyse d'affluence",
+    "description": "SocialAffluence utilise les dernières avancées en intelligence artificielle et computer vision pour analyser les flux de personnes en temps réel.",
+    "features": {
+      "aiAlgorithms": "Algorithmes d'IA TensorFlow optimisés",
+      "onDeviceArchitecture": "Architecture on-device",
+      "nosqlStorage": "Sotckage no-sql pour intégrations",
+      "realTimeDashboards": "Tableaux de bord en temps réel"
+    },
+    "performanceStats": "Statistiques de performance",
+    "detectionAccuracy": "Précision de détection",
+    "satisfactionRating": "Note de satisfaction 5 étoiles"
+  },
+  "cta": {
+    "title": "Prêt à optimiser votre espace ?",
+    "description": "Rejoignez des centaines d'entreprises qui font confiance à SocialAffluence pour analyser leur affluence.",
+    "startNow": "Commencer maintenant",
+    "startNowDescription": "Créer votre compte pour commencer l'analyse d'affluence dès aujourd'hui"
+  },
+  "footer": {
+    "copyright": "© 2024 SocialAffluence. Tous droits réservés."
+  },
+  "pricing": {
+    "title": "Tarifs",
+    "titleHighlight": "transparents",
+    "description": "Choisissez la formule qui correspond à vos besoins. Aucun frais caché, résiliable à tout moment.",
+    "oneShot": {
+      "badge": "Ponctuel",
+      "title": "Analyse One-Shot",
+      "description": "Parfait pour des événements ou analyses ponctuelles",
+      "price": "5€",
+      "priceUnit": "par analyse"
+    },
+    "faq": {
+      "title": "Questions fréquentes"
+    }
+  }
+}
