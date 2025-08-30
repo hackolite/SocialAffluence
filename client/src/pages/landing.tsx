@@ -65,7 +65,7 @@ export default function Landing() {
                 <img 
                   src="/img/demo-affluence.svg" 
                   alt="Demo SocialAffluence Dashboard" 
-                  className="w-full max-w-md h-auto rounded-lg"
+                  className="w-full max-w-sm lg:max-w-md h-auto rounded-lg landing-hero-img"
                 />
               </div>
             </div>
@@ -88,12 +88,12 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
-              <CardContent className="p-6">
+              <CardContent className="p-6 feature-card">
                 <div className="mb-4">
                   <img 
                     src="/img/ia-precision.svg" 
                     alt="IA de Précision" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
+                    className="w-full h-20 sm:h-24 object-contain rounded-lg mb-4 landing-feature-img"
                   />
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Eye className="h-6 w-6 text-white" />
@@ -108,12 +108,12 @@ export default function Landing() {
             </Card>
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
-              <CardContent className="p-6">
+              <CardContent className="p-6 feature-card">
                 <div className="mb-4">
                   <img 
                     src="/img/temps-reel.svg" 
                     alt="Temps Réel" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
+                    className="w-full h-20 sm:h-24 object-contain rounded-lg mb-4 landing-feature-img"
                   />
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Clock className="h-6 w-6 text-white" />
@@ -128,12 +128,12 @@ export default function Landing() {
             </Card>
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
-              <CardContent className="p-6">
+              <CardContent className="p-6 feature-card">
                 <div className="mb-4">
                   <img 
                     src="/img/historique.svg" 
                     alt="Historique Complet" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
+                    className="w-full h-20 sm:h-24 object-contain rounded-lg mb-4 landing-feature-img"
                   />
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <BarChart3 className="h-6 w-6 text-white" />
@@ -148,12 +148,12 @@ export default function Landing() {
             </Card>
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
-              <CardContent className="p-6">
+              <CardContent className="p-6 feature-card">
                 <div className="mb-4">
                   <img 
                     src="/img/multi-cameras.svg" 
                     alt="Multi-Caméras" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
+                    className="w-full h-20 sm:h-24 object-contain rounded-lg mb-4 landing-feature-img"
                   />
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Users className="h-6 w-6 text-white" />
@@ -168,12 +168,12 @@ export default function Landing() {
             </Card>
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
-              <CardContent className="p-6">
+              <CardContent className="p-6 feature-card">
                 <div className="mb-4">
                   <img 
                     src="/img/securite.svg" 
                     alt="Sécurisé" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
+                    className="w-full h-20 sm:h-24 object-contain rounded-lg mb-4 landing-feature-img"
                   />
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Shield className="h-6 w-6 text-white" />
@@ -188,12 +188,12 @@ export default function Landing() {
             </Card>
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
-              <CardContent className="p-6">
+              <CardContent className="p-6 feature-card">
                 <div className="mb-4">
                   <img 
                     src="/img/mobile-install.svg" 
                     alt="Zéro Installation" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
+                    className="w-full h-20 sm:h-24 object-contain rounded-lg mb-4 landing-feature-img"
                   />
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Zap className="h-6 w-6 text-white" />
@@ -246,7 +246,7 @@ export default function Landing() {
                 <img 
                   src="/img/fake-stats.svg" 
                   alt="Statistiques Analytics" 
-                  className="w-full h-64 object-cover"
+                  className="w-full h-48 sm:h-56 lg:h-64 object-contain landing-about-img"
                 />
                 <div className="p-8">
                   <div className="text-center">

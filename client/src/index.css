@@ -140,6 +140,41 @@
   }
 
   /* -------------------- Mobile enhancements -------------------- */
+  
+  /* Smooth scrolling optimizations */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  @media (max-width: 768px) {
+    /* Enable hardware acceleration for smoother scrolling */
+    body {
+      -webkit-overflow-scrolling: touch;
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+    }
+    
+    /* Optimize image rendering on mobile */
+    img {
+      image-rendering: optimizeSpeed;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: optimize-contrast;
+      -ms-interpolation-mode: nearest-neighbor;
+    }
+    
+    /* Optimize glass effect for mobile */
+    .glass {
+      will-change: transform;
+      transform: translateZ(0);
+    }
+    
+    /* Reduce motion on mobile for better performance */
+    .gradient-primary,
+    .gradient-secondary,
+    .gradient-danger {
+      will-change: opacity;
+    }
+  }
 
   @media (max-width: 640px) {
     .glass {
@@ -167,6 +202,25 @@
     .gradient-secondary,
     .gradient-danger {
       background-size: 150% 150%;
+    }
+    
+    /* Mobile-specific image optimizations */
+    .landing-feature-img {
+      height: 80px !important;
+      object-fit: contain !important;
+    }
+    
+    .landing-hero-img {
+      max-width: 320px !important;
+    }
+    
+    .landing-about-img {
+      height: 192px !important;
+    }
+    
+    /* Reduce card padding on mobile for better space utilization */
+    .feature-card {
+      @apply p-4;
     }
   }
 }
