@@ -1,6 +1,7 @@
 import { ArrowRight, Eye, Clock, BarChart3, Shield, Users, Zap, CheckCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 
 export default function Landing() {
   return (
@@ -69,6 +70,87 @@ export default function Landing() {
                 />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Real-World Examples Carousel */}
+      <section className="py-20 px-4 bg-slate-900/50">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Détection d'objets en conditions réelles
+            </h2>
+            <p className="text-slate-300 text-lg max-w-3xl mx-auto">
+              Découvrez comment notre IA analyse les environnements de vente au détail en temps réel 
+              pour optimiser l'expérience client et les opérations.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <Carousel className="w-full">
+              <CarouselContent>
+                <CarouselItem>
+                  <div className="glass rounded-lg overflow-hidden border border-slate-700">
+                    <img 
+                      src="/img/retail-detection-1.svg" 
+                      alt="Détection de personnes dans un magasin" 
+                      className="w-full h-64 md:h-80 object-cover"
+                    />
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold text-white mb-2">
+                        Analyse de l'affluence en magasin
+                      </h3>
+                      <p className="text-slate-300">
+                        Comptage précis des clients en temps réel avec détection des zones d'affluence 
+                        pour optimiser l'agencement et améliorer le parcours client.
+                      </p>
+                    </div>
+                  </div>
+                </CarouselItem>
+                
+                <CarouselItem>
+                  <div className="glass rounded-lg overflow-hidden border border-slate-700">
+                    <img 
+                      src="/img/retail-detection-2.svg" 
+                      alt="Gestion des files d'attente" 
+                      className="w-full h-64 md:h-80 object-cover"
+                    />
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold text-white mb-2">
+                        Gestion intelligente des files d'attente
+                      </h3>
+                      <p className="text-slate-300">
+                        Surveillance automatique des temps d'attente aux caisses avec alertes 
+                        pour optimiser l'ouverture de nouvelles caisses en temps réel.
+                      </p>
+                    </div>
+                  </div>
+                </CarouselItem>
+                
+                <CarouselItem>
+                  <div className="glass rounded-lg overflow-hidden border border-slate-700">
+                    <img 
+                      src="/img/retail-detection-3.svg" 
+                      alt="Analyse comportementale clients" 
+                      className="w-full h-64 md:h-80 object-cover"
+                    />
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold text-white mb-2">
+                        Analyse comportementale avancée
+                      </h3>
+                      <p className="text-slate-300">
+                        Compréhension des parcours clients et points d'intérêt pour optimiser 
+                        le placement des produits et améliorer les ventes.
+                      </p>
+                    </div>
+                  </div>
+                </CarouselItem>
+              </CarouselContent>
+              
+              <CarouselPrevious className="bg-slate-800 border-slate-600 hover:bg-slate-700 text-white" />
+              <CarouselNext className="bg-slate-800 border-slate-600 hover:bg-slate-700 text-white" />
+            </Carousel>
           </div>
         </div>
       </section>

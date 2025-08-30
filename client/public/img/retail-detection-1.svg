@@ -1,0 +1,81 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#1e293b"/>
+  
+  <!-- Store floor -->
+  <rect x="0" y="400" width="800" height="200" fill="#374151"/>
+  
+  <!-- Shelves -->
+  <rect x="50" y="350" width="150" height="50" fill="#6b7280" rx="5"/>
+  <rect x="250" y="350" width="150" height="50" fill="#6b7280" rx="5"/>
+  <rect x="450" y="350" width="150" height="50" fill="#6b7280" rx="5"/>
+  <rect x="650" y="350" width="100" height="50" fill="#6b7280" rx="5"/>
+  
+  <!-- Products on shelves -->
+  <circle cx="75" cy="375" r="8" fill="#ef4444"/>
+  <circle cx="100" cy="375" r="8" fill="#10b981"/>
+  <circle cx="125" cy="375" r="8" fill="#3b82f6"/>
+  <circle cx="150" cy="375" r="8" fill="#f59e0b"/>
+  <circle cx="175" cy="375" r="8" fill="#8b5cf6"/>
+  
+  <circle cx="275" cy="375" r="8" fill="#ef4444"/>
+  <circle cx="300" cy="375" r="8" fill="#10b981"/>
+  <circle cx="325" cy="375" r="8" fill="#3b82f6"/>
+  <circle cx="350" cy="375" r="8" fill="#f59e0b"/>
+  <circle cx="375" cy="375" r="8" fill="#8b5cf6"/>
+  
+  <!-- People with detection boxes -->
+  <!-- Person 1 -->
+  <ellipse cx="150" cy="480" rx="15" ry="8" fill="#4b5563"/>
+  <rect x="135" y="420" width="30" height="60" fill="#3b82f6" rx="15"/>
+  <circle cx="150" cy="430" r="12" fill="#fbbf24"/>
+  <!-- Detection box for person 1 -->
+  <rect x="125" y="410" width="50" height="80" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="5,5"/>
+  <rect x="125" y="410" width="40" height="15" fill="#10b981"/>
+  <text x="130" y="421" fill="white" font-size="10" font-weight="bold">PERSON</text>
+  
+  <!-- Person 2 -->
+  <ellipse cx="350" cy="480" rx="15" ry="8" fill="#4b5563"/>
+  <rect x="335" y="420" width="30" height="60" fill="#ef4444" rx="15"/>
+  <circle cx="350" cy="430" r="12" fill="#fbbf24"/>
+  <!-- Detection box for person 2 -->
+  <rect x="325" y="410" width="50" height="80" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="5,5"/>
+  <rect x="325" y="410" width="40" height="15" fill="#10b981"/>
+  <text x="330" y="421" fill="white" font-size="10" font-weight="bold">PERSON</text>
+  
+  <!-- Person 3 -->
+  <ellipse cx="550" cy="480" rx="15" ry="8" fill="#4b5563"/>
+  <rect x="535" y="420" width="30" height="60" fill="#8b5cf6" rx="15"/>
+  <circle cx="550" cy="430" r="12" fill="#fbbf24"/>
+  <!-- Detection box for person 3 -->
+  <rect x="525" y="410" width="50" height="80" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="5,5"/>
+  <rect x="525" y="410" width="40" height="15" fill="#10b981"/>
+  <text x="530" y="421" fill="white" font-size="10" font-weight="bold">PERSON</text>
+  
+  <!-- Shopping cart -->
+  <rect x="200" y="460" width="25" height="20" fill="#6b7280" rx="3"/>
+  <circle cx="205" cy="485" r="4" fill="#374151"/>
+  <circle cx="220" cy="485" r="4" fill="#374151"/>
+  <!-- Detection box for cart -->
+  <rect x="195" y="455" width="35" height="35" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,3"/>
+  
+  <!-- AI Detection indicators -->
+  <circle cx="100" cy="100" r="3" fill="#10b981" opacity="0.8"/>
+  <circle cx="120" cy="120" r="3" fill="#10b981" opacity="0.6"/>
+  <circle cx="140" cy="110" r="3" fill="#10b981" opacity="0.9"/>
+  <circle cx="300" cy="80" r="3" fill="#10b981" opacity="0.7"/>
+  <circle cx="320" cy="100" r="3" fill="#10b981" opacity="0.8"/>
+  <circle cx="500" cy="90" r="3" fill="#10b981" opacity="0.6"/>
+  <circle cx="520" cy="110" r="3" fill="#10b981" opacity="0.9"/>
+  
+  <!-- Title -->
+  <text x="400" y="50" text-anchor="middle" fill="white" font-size="24" font-weight="bold">Détection IA en Magasin</text>
+  <text x="400" y="75" text-anchor="middle" fill="#94a3b8" font-size="14">Surveillance temps réel de l'affluence</text>
+  
+  <!-- Stats overlay -->
+  <rect x="20" y="20" width="150" height="80" fill="rgba(30, 41, 59, 0.9)" rx="8"/>
+  <text x="30" y="40" fill="#10b981" font-size="14" font-weight="bold">Détections actives</text>
+  <text x="30" y="60" fill="white" font-size="18" font-weight="bold">3 Personnes</text>
+  <text x="30" y="80" fill="#f59e0b" font-size="14">1 Chariot</text>
+  <text x="30" y="95" fill="#94a3b8" font-size="12">Confiance: 95%</text>
+</svg>
