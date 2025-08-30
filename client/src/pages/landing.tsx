@@ -35,28 +35,39 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section className="py-20 px-4">
-        <div className="container mx-auto text-center">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Surveillez l'affluence en{" "}
-              <span className="gradient-text">temps réel</span>
-            </h1>
-            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-              Analysez le flux de personnes avec notre IA avancée. Obtenez des insights précis 
-              pour optimiser vos espaces et améliorer l'expérience client.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="gradient-primary hover:opacity-90" asChild>
-                <a href="/signup">
-                  Commencer gratuitement
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
-              </Button>
-              <Button size="lg" variant="outline" className="border-slate-600 text-white hover:bg-slate-800" asChild>
-                <a href="/dashboard">
-                  Voir la démo
-                </a>
-              </Button>
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="text-center lg:text-left">
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+                Surveillez l'affluence en{" "}
+                <span className="gradient-text">temps réel</span>
+              </h1>
+              <p className="text-xl text-slate-300 mb-8">
+                Analysez le flux de personnes avec notre IA avancée. Obtenez des insights précis 
+                pour optimiser vos espaces et améliorer l'expérience client.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Button size="lg" className="gradient-primary hover:opacity-90" asChild>
+                  <a href="/signup">
+                    Commencer gratuitement
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </a>
+                </Button>
+                <Button size="lg" variant="outline" className="border-slate-600 text-white hover:bg-slate-800" asChild>
+                  <a href="/dashboard">
+                    Voir la démo
+                  </a>
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-center lg:justify-end">
+              <div className="glass rounded-lg p-4 border border-slate-700">
+                <img 
+                  src="/img/demo-affluence.svg" 
+                  alt="Demo SocialAffluence Dashboard" 
+                  className="w-full max-w-md h-auto rounded-lg"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -78,8 +89,15 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center mb-4">
-                  <Eye className="h-6 w-6 text-white" />
+                <div className="mb-4">
+                  <img 
+                    src="/img/ia-precision.svg" 
+                    alt="IA de Précision" 
+                    className="w-full h-32 object-cover rounded-lg mb-4"
+                  />
+                  <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                    <Eye className="h-6 w-6 text-white" />
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">IA de Précision</h3>
                 <p className="text-slate-300">
@@ -91,8 +109,15 @@ export default function Landing() {
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center mb-4">
-                  <Clock className="h-6 w-6 text-white" />
+                <div className="mb-4">
+                  <img 
+                    src="/img/temps-reel.svg" 
+                    alt="Temps Réel" 
+                    className="w-full h-32 object-cover rounded-lg mb-4"
+                  />
+                  <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                    <Clock className="h-6 w-6 text-white" />
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">Temps Réel</h3>
                 <p className="text-slate-300">
@@ -104,8 +129,15 @@ export default function Landing() {
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center mb-4">
-                  <BarChart3 className="h-6 w-6 text-white" />
+                <div className="mb-4">
+                  <img 
+                    src="/img/historique.svg" 
+                    alt="Historique Complet" 
+                    className="w-full h-32 object-cover rounded-lg mb-4"
+                  />
+                  <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                    <BarChart3 className="h-6 w-6 text-white" />
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">Historique Complet</h3>
                 <p className="text-slate-300">
@@ -117,8 +149,15 @@ export default function Landing() {
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-white" />
+                <div className="mb-4">
+                  <img 
+                    src="/img/multi-cameras.svg" 
+                    alt="Multi-Caméras" 
+                    className="w-full h-32 object-cover rounded-lg mb-4"
+                  />
+                  <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">Multi-Caméras</h3>
                 <p className="text-slate-300">
@@ -130,8 +169,15 @@ export default function Landing() {
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="h-6 w-6 text-white" />
+                <div className="mb-4">
+                  <img 
+                    src="/img/securite.svg" 
+                    alt="Sécurisé" 
+                    className="w-full h-32 object-cover rounded-lg mb-4"
+                  />
+                  <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">Sécurisé</h3>
                 <p className="text-slate-300">
@@ -143,13 +189,20 @@ export default function Landing() {
 
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
-                <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center mb-4">
-                  <Zap className="h-6 w-6 text-white" />
+                <div className="mb-4">
+                  <img 
+                    src="/img/mobile-install.svg" 
+                    alt="Zéro Installation" 
+                    className="w-full h-32 object-cover rounded-lg mb-4"
+                  />
+                  <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                    <Zap className="h-6 w-6 text-white" />
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Installation Rapide</h3>
+                <h3 className="text-xl font-semibold text-white mb-2">Zéro Installation</h3>
                 <p className="text-slate-300">
-                  Déployement en moins de 10 minutes avec interface intuitive 
-                  et support technique dédié.
+                  Tout fonctionne directement sur votre téléphone, aucune configuration complexe requise. 
+                  Démarrez en quelques secondes !
                 </p>
               </CardContent>
             </Card>
@@ -189,17 +242,24 @@ export default function Landing() {
               </div>
             </div>
             <div className="relative">
-              <div className="glass rounded-lg p-8 border border-slate-700">
-                <div className="text-center">
-                  <div className="w-20 h-20 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BarChart3 className="h-10 w-10 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">95%+</h3>
-                  <p className="text-slate-300 mb-4">Précision de détection</p>
-                  <div className="flex justify-center space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                    ))}
+              <div className="glass rounded-lg border border-slate-700 overflow-hidden">
+                <img 
+                  src="/img/fake-stats.svg" 
+                  alt="Statistiques Analytics" 
+                  className="w-full h-64 object-cover"
+                />
+                <div className="p-8">
+                  <div className="text-center">
+                    <div className="w-20 h-20 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BarChart3 className="h-10 w-10 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2">95%+</h3>
+                    <p className="text-slate-300 mb-4">Précision de détection</p>
+                    <div className="flex justify-center space-x-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
