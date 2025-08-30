@@ -26,5 +26,5 @@
   <rect x="115" y="110" width="10" height="2" fill="#10b981" rx="1" opacity="0.4"/>
   <rect x="275" y="110" width="10" height="2" fill="#10b981" rx="1" opacity="0.4"/>
   
-  <text x="200" y="185" font-family="Arial, sans-serif" font-size="16" fill="white" text-anchor="middle">Sécurisé & Conforme RGPD</text>
+  <text x="200" y="185" font-family="Arial, sans-serif" font-size="16" fill="white" text-anchor="middle">Sécurisé &amp; Conforme RGPD</text>
 </svg>
