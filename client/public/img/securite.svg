@@ -1,0 +1,11 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#1e293b"/>
+  <rect x="150" y="80" width="100" height="120" fill="#374151" rx="10"/>
+  <circle cx="200" cy="120" r="25" fill="#10b981"/>
+  <path d="M190 115 l5 5 l15 -15" stroke="white" stroke-width="3" fill="none"/>
+  <rect x="170" y="150" width="60" height="8" fill="#10b981" rx="4"/>
+  <rect x="170" y="165" width="60" height="8" fill="#10b981" rx="4"/>
+  <rect x="170" y="180" width="60" height="8" fill="#10b981" rx="4"/>
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="18" fill="white" text-anchor="middle">Sécurisé</text>
+  <text x="200" y="270" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8" text-anchor="middle">RGPD & Chiffrement</text>
+</svg>
