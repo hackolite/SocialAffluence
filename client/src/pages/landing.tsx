@@ -178,11 +178,10 @@ export default function Landing() {
           <div className="container mx-auto">
             <header className="text-center mb-16">
               <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Pourquoi choisir SocialAffluence ?
+                {t('features.title')}
               </h2>
               <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-                Notre plateforme combine l'intelligence artificielle et l'analyse temps réel 
-                pour vous offrir des insights sans précédent.
+                {t('features.description')}
               </p>
             </header>
 
@@ -200,10 +199,9 @@ export default function Landing() {
                         <Eye className="h-6 w-6 text-white" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">IA de Précision</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">{t('features.aiPrecision.title')}</h3>
                     <p className="text-slate-300">
-                      Détection avancée alimentée par TensorFlow avec une précision de 95%+ 
-                      pour identifier personnes et véhicules.
+                      {t('features.aiPrecision.description')}
                     </p>
                   </CardContent>
                 </Card>
@@ -222,10 +220,9 @@ export default function Landing() {
                         <Clock className="h-6 w-6 text-white" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Temps Réel</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">{t('features.realTime.title')}</h3>
                     <p className="text-slate-300">
-                      Monitoring en direct avec mise à jour instantanée des métriques 
-                      et alertes automatiques.
+                      {t('features.realTime.description')}
                     </p>
                   </CardContent>
                 </Card>
@@ -244,10 +241,9 @@ export default function Landing() {
                         <BarChart3 className="h-6 w-6 text-white" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Historique Complet</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">{t('features.fullHistory.title')}</h3>
                     <p className="text-slate-300">
-                      Analysez les tendances par jour, semaine ou mois avec des 
-                      graphiques interactifs et exports CSV/PDF.
+                      {t('features.fullHistory.description')}
                     </p>
                   </CardContent>
                 </Card>
@@ -266,10 +262,9 @@ export default function Landing() {
                         <Users className="h-6 w-6 text-white" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Multi-Caméras</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">{t('features.multiCamera.title')}</h3>
                     <p className="text-slate-300">
-                      Gérez plusieurs caméras simultanément avec filtrage par zone 
-                      et vue d'ensemble centralisée.
+                      {t('features.multiCamera.description')}
                     </p>
                   </CardContent>
                 </Card>
@@ -288,10 +283,9 @@ export default function Landing() {
                         <Shield className="h-6 w-6 text-white" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Sécurisé</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">{t('features.secure.title')}</h3>
                     <p className="text-slate-300">
-                      Données chiffrées, conformité RGPD et stockage sécurisé 
-                      avec authentification multi-facteurs.
+                      {t('features.secure.description')}
                     </p>
                   </CardContent>
                 </Card>
@@ -310,10 +304,9 @@ export default function Landing() {
                         <Zap className="h-6 w-6 text-white" />
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Zéro Installation</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">{t('features.zeroInstall.title')}</h3>
                     <p className="text-slate-300">
-                      Tout fonctionne directement sur votre téléphone, aucune configuration complexe requise. 
-                      Démarrez en quelques secondes !
+                      {t('features.zeroInstall.description')}
                     </p>
                   </CardContent>
                 </Card>
@@ -328,11 +321,10 @@ export default function Landing() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <article>
                 <h2 id="about-heading" className="text-3xl md:text-4xl font-bold text-white mb-6">
-                  Technologie de pointe pour l'analyse d'affluence
+                  {t('about.title')}
                 </h2>
                 <p className="text-slate-300 text-lg mb-6">
-                  SocialAffluence utilise les dernières avancées en intelligence artificielle 
-                  et computer vision pour analyser les flux de personnes en temps réel.
+                  {t('about.description')}
                 </p>
                 <ul className="space-y-4" role="list">
                   <li className="flex items-center space-x-3" role="listitem">
@@ -385,15 +377,14 @@ export default function Landing() {
           <div className="container mx-auto text-center">
             <div className="max-w-3xl mx-auto">
               <h2 id="cta-heading" className="text-3xl md:text-4xl font-bold text-white mb-6">
-                Prêt à optimiser votre espace ?
+                {t('cta.title')}
               </h2>
               <p className="text-xl text-slate-300 mb-8">
-                Rejoignez des centaines d'entreprises qui font confiance à SocialAffluence 
-                pour analyser leur affluence.
+                {t('cta.description')}
               </p>
               <Button size="lg" className="gradient-primary hover:opacity-90" asChild>
                 <a href="/signup" aria-describedby="cta-description">
-                  Commencer maintenant
+                  {t('cta.startNow')}
                   <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                 </a>
               </Button>
@@ -414,7 +405,7 @@ export default function Landing() {
               <span className="text-white font-semibold">SocialAffluence</span>
             </div>
             <p className="text-slate-400 text-center md:text-right">
-              © 2024 SocialAffluence. Tous droits réservés.
+              {t('footer.copyright')}
             </p>
           </div>
         </div>
