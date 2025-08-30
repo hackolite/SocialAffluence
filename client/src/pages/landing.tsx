@@ -1,12 +1,14 @@
-import { ArrowRight, Eye, Clock, BarChart3, Shield, Users, Zap, CheckCircle, Star } from "lucide-react";
+import { ArrowRight, Eye, Clock, BarChart3, Shield, Users, Zap, CheckCircle, Star, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Landing() {
   const { t } = useTranslation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800">
@@ -28,6 +30,8 @@ export default function Landing() {
               </div>
               <span className="text-xl font-bold text-white">SocialAffluence</span>
             </div>
+            
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6" role="navigation" aria-label={t('navigation.mainNavigation')}>
               <a href="#features" className="text-slate-400 hover:text-white transition-colors">
                 {t('navigation.features')}
@@ -43,8 +47,62 @@ export default function Landing() {
                 <a href="/login">{t('navigation.login')}</a>
               </Button>
             </nav>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle mobile menu"
+                className="text-white hover:bg-slate-800"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-700 bg-slate-900/95 backdrop-blur-sm">
+            <nav className="container mx-auto px-4 py-4 space-y-4" role="navigation" aria-label="Mobile navigation">
+              <a 
+                href="#features" 
+                className="block text-slate-300 hover:text-white transition-colors py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('navigation.features')}
+              </a>
+              <a 
+                href="/pricing" 
+                className="block text-slate-300 hover:text-white transition-colors py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('navigation.pricing')}
+              </a>
+              <a 
+                href="#about" 
+                className="block text-slate-300 hover:text-white transition-colors py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t('navigation.about')}
+              </a>
+              <div className="py-2">
+                <LanguageSwitcher />
+              </div>
+              <div className="pt-2">
+                <Button className="gradient-primary hover:opacity-90 w-full" asChild>
+                  <a href="/login">{t('navigation.login')}</a>
+                </Button>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
