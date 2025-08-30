@@ -95,10 +95,6 @@ export default function Landing() {
                 Détection d'objets en conditions réelles
               </h2>
               <p className="text-slate-300 text-lg max-w-3xl mx-auto">
-               Notre solution de comptage et d’analyse en temps réel permet de transformer la gestion des flux urbains en un véritable levier d’efficacité et de qualité de vie. 
-               Grâce à des algorithmes avancés de détection et d’IA, nous fournissons des données précises sur la densité (sous forme de heatmap) 
-               et les déplacements des personnes dans les espaces publics, 
-               commerces, gares, transports, et zones événementielles.
               </p>
             </header>
 
@@ -114,11 +110,13 @@ export default function Landing() {
                       />
                       <div className="p-6">
                         <h3 className="text-xl font-semibold text-white mb-2">
-                          Analyse de l'affluence en magasin
+                          Analyse de l'affluence en milieu urbain
                         </h3>
                         <p className="text-slate-300">
-                          Comptage précis des clients en temps réel avec détection des zones d'affluence 
-                          pour optimiser l'agencement et améliorer le parcours client.
+                        Notre solution de comptage et d’analyse en temps réel permet de transformer la gestion des flux urbains en un véritable levier d’efficacité et de qualité de vie. 
+                        Grâce à des algorithmes avancés de détection et d’IA, nous fournissons des données précises sur la densité (sous forme de heatmap- à venir) 
+                        et les déplacements des personnes dans les espaces publics, 
+                        commerces, gares, transports, et zones événementielles.
                         </p>
                       </div>
                     </article>
@@ -133,7 +131,7 @@ export default function Landing() {
                       />
                       <div className="p-6">
                         <h3 className="text-xl font-semibold text-white mb-2">
-                          Gestion intelligente des files d'attente
+                          Gestion intelligente des zones portuaire, plaisance ou commerce
                         </h3>
                         <p className="text-slate-300">
                         En fournissant des données précises sur le nombre de navires, leur position, leur rotation et leur temps de séjour, 
