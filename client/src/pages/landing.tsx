@@ -95,8 +95,10 @@ export default function Landing() {
                 Détection d'objets en conditions réelles
               </h2>
               <p className="text-slate-300 text-lg max-w-3xl mx-auto">
-                Découvrez comment notre IA analyse les environnements de vente au détail en temps réel 
-                pour optimiser l'expérience client et les opérations.
+               Notre solution de comptage et d’analyse en temps réel permet de transformer la gestion des flux urbains en un véritable levier d’efficacité et de qualité de vie. 
+               Grâce à des algorithmes avancés de détection et d’IA, nous fournissons des données précises sur la densité (sous forme de heatmap) 
+               et les déplacements des personnes dans les espaces publics, 
+               commerces, gares, transports, et zones événementielles.
               </p>
             </header>
 
@@ -134,8 +136,8 @@ export default function Landing() {
                           Gestion intelligente des files d'attente
                         </h3>
                         <p className="text-slate-300">
-                          Surveillance automatique des temps d'attente aux caisses avec alertes 
-                          pour optimiser l'ouverture de nouvelles caisses en temps réel.
+                        En fournissant des données précises sur le nombre de navires, leur position, leur rotation et leur temps de séjour, 
+                        les opérateurs peuvent optimiser le planning de déchargement et de chargement, réduire les temps d’attente et améliorer la fluidité des opérations.
                         </p>
                       </div>
                     </article>
