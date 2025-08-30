@@ -131,11 +131,12 @@ export default function Landing() {
                       />
                       <div className="p-6">
                         <h3 className="text-xl font-semibold text-white mb-2">
-                          Gestion intelligente des zones portuaire, plaisance ou commerce
+                        Analyse comportementale avancée en magasin 
                         </h3>
                         <p className="text-slate-300">
-                        En fournissant des données précises sur le nombre de navires, leur position, leur rotation et leur temps de séjour, 
-                        les opérateurs peuvent optimiser le planning de déchargement et de chargement, réduire les temps d’attente et améliorer la fluidité des opérations.
+                         En fournissant des données précises sur le nombre de clients, leur répartition et leur parcours à l’intérieur du magasin, 
+                          les équipes peuvent optimiser l’agencement des rayons, améliorer le service client et adapter les ressources en fonction des pics d’activité. 
+                          Ces informations permettent également de mesurer l’impact des promotions, d’anticiper les flux et de créer une expérience client plus fluide et satisfaisante.
                         </p>
                       </div>
                     </article>
@@ -150,11 +151,11 @@ export default function Landing() {
                       />
                       <div className="p-6">
                         <h3 className="text-xl font-semibold text-white mb-2">
-                          Analyse comportementale avancée
+                          Gestion intelligente des zones portuaire, plaisance ou commerce
                         </h3>
                         <p className="text-slate-300">
-                          Compréhension des parcours clients et points d'intérêt pour optimiser 
-                          le placement des produits et améliorer les ventes.
+                        En fournissant des données précises sur le nombre de navires, leur position, leur rotation et leur temps de séjour, 
+                        les opérateurs peuvent optimiser le planning de déchargement et de chargement, réduire les temps d’attente et améliorer la fluidité des opérations.
                         </p>
                       </div>
                     </article>
