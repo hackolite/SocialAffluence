@@ -1,6 +1,7 @@
 import { ArrowRight, Eye, Clock, BarChart3, Shield, Users, Zap, CheckCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 export default function Landing() {
   return (
@@ -90,11 +91,13 @@ export default function Landing() {
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
                 <div className="mb-4">
-                  <img 
-                    src="/img/ia-precision.svg" 
-                    alt="IA de Précision" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
-                  />
+                  <AspectRatio ratio={2/1} className="mb-4">
+                    <img 
+                      src="/img/ia-precision.svg" 
+                      alt="IA de Précision" 
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  </AspectRatio>
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Eye className="h-6 w-6 text-white" />
                   </div>
@@ -110,11 +113,13 @@ export default function Landing() {
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
                 <div className="mb-4">
-                  <img 
-                    src="/img/temps-reel.svg" 
-                    alt="Temps Réel" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
-                  />
+                  <AspectRatio ratio={2/1} className="mb-4">
+                    <img 
+                      src="/img/temps-reel.svg" 
+                      alt="Temps Réel" 
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  </AspectRatio>
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Clock className="h-6 w-6 text-white" />
                   </div>
@@ -130,11 +135,13 @@ export default function Landing() {
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
                 <div className="mb-4">
-                  <img 
-                    src="/img/historique.svg" 
-                    alt="Historique Complet" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
-                  />
+                  <AspectRatio ratio={2/1} className="mb-4">
+                    <img 
+                      src="/img/historique.svg" 
+                      alt="Historique Complet" 
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  </AspectRatio>
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <BarChart3 className="h-6 w-6 text-white" />
                   </div>
@@ -150,11 +157,13 @@ export default function Landing() {
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
                 <div className="mb-4">
-                  <img 
-                    src="/img/multi-cameras.svg" 
-                    alt="Multi-Caméras" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
-                  />
+                  <AspectRatio ratio={2/1} className="mb-4">
+                    <img 
+                      src="/img/multi-cameras.svg" 
+                      alt="Multi-Caméras" 
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  </AspectRatio>
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Users className="h-6 w-6 text-white" />
                   </div>
@@ -170,11 +179,13 @@ export default function Landing() {
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
                 <div className="mb-4">
-                  <img 
-                    src="/img/securite.svg" 
-                    alt="Sécurisé" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
-                  />
+                  <AspectRatio ratio={2/1} className="mb-4">
+                    <img 
+                      src="/img/securite.svg" 
+                      alt="Sécurisé" 
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  </AspectRatio>
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Shield className="h-6 w-6 text-white" />
                   </div>
@@ -190,11 +201,13 @@ export default function Landing() {
             <Card className="glass border-slate-700 hover:border-primary/50 transition-colors">
               <CardContent className="p-6">
                 <div className="mb-4">
-                  <img 
-                    src="/img/mobile-install.svg" 
-                    alt="Zéro Installation" 
-                    className="w-full h-32 object-cover rounded-lg mb-4"
-                  />
+                  <AspectRatio ratio={2/1} className="mb-4">
+                    <img 
+                      src="/img/mobile-install.svg" 
+                      alt="Zéro Installation" 
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  </AspectRatio>
                   <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
                     <Zap className="h-6 w-6 text-white" />
                   </div>
