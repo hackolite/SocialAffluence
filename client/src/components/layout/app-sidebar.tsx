@@ -9,11 +9,21 @@ import {
   Bell,
   Shield,
   Menu,
-  X
+  X,
+  LogOut,
+  UserCircle
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -80,7 +90,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ children }: AppSidebarProps) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
 
   return (
     <SidebarProvider>
@@ -182,11 +192,36 @@ export function AppSidebar({ children }: AppSidebarProps) {
                 <Bell className="h-5 w-5" />
               </Button>
               {isAuthenticated && user && !isLoading ? (
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary text-white text-sm">
-                    {getUserInitials(user)}
-                  </AvatarFallback>
-                </Avatar>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
+                      <AvatarFallback className="bg-primary text-white text-sm">
+                        {getUserInitials(user)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="flex flex-col space-y-1">
+                      <span className="text-sm font-medium">{getUserDisplayName(user)}</span>
+                      <span className="text-xs text-muted-foreground">{user.email || user.username}</span>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <a href="/account" className="flex items-center">
+                        <UserCircle className="mr-2 h-4 w-4" />
+                        Mon compte
+                      </a>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={logout}
+                      className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Déconnexion
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Avatar className="h-8 w-8">
                   <AvatarFallback className="bg-slate-600 text-white text-sm">
