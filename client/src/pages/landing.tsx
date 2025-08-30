@@ -106,7 +106,7 @@ export default function Landing() {
                   <CarouselItem>
                     <article className="glass rounded-lg overflow-hidden border border-slate-700">
                       <img 
-                        src="/img/retail-detection-1.svg" 
+                        src="/img/obj.png" 
                         alt="Interface d'analyse montrant la détection automatique de personnes dans un magasin avec zones de densité en temps réel et compteurs de flux clients"
                         className="w-full h-64 md:h-80 object-cover"
                       />
@@ -125,7 +125,7 @@ export default function Landing() {
                   <CarouselItem>
                     <article className="glass rounded-lg overflow-hidden border border-slate-700">
                       <img 
-                        src="/img/retail-detection-2.svg" 
+                        src="/img/bottle.png" 
                         alt="Système de monitoring des files d'attente avec alertes automatiques pour temps d'attente et suggestions d'ouverture de caisses supplémentaires"
                         className="w-full h-64 md:h-80 object-cover"
                       />
@@ -144,7 +144,7 @@ export default function Landing() {
                   <CarouselItem>
                     <article className="glass rounded-lg overflow-hidden border border-slate-700">
                       <img 
-                        src="/img/retail-detection-3.svg" 
+                        src="/img/boat.jpeg" 
                         alt="Carte de chaleur comportementale des clients avec trajectoires de mouvement et zones d'intérêt pour optimisation du placement produits"
                         className="w-full h-64 md:h-80 object-cover"
                       />
