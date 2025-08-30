@@ -336,11 +336,11 @@ export default function Landing() {
                   </li>
                   <li className="flex items-center space-x-3" role="listitem">
                     <CheckCircle className="h-6 w-6 text-primary" aria-hidden="true" />
-                    <span className="text-white">Architecture cloud native scalable</span>
+                    <span className="text-white">Architecture on-device</span>
                   </li>
                   <li className="flex items-center space-x-3" role="listitem">
                     <CheckCircle className="h-6 w-6 text-primary" aria-hidden="true" />
-                    <span className="text-white">API RESTful pour intégrations</span>
+                    <span className="text-white">Sotckage no-sql pour intégrations</span>
                   </li>
                   <li className="flex items-center space-x-3" role="listitem">
                     <CheckCircle className="h-6 w-6 text-primary" aria-hidden="true" />
