@@ -87,7 +87,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto">
+          <div className="w-full">
             <Carousel className="w-full">
               <CarouselContent>
                 <CarouselItem>
