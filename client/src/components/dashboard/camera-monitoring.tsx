@@ -14,6 +14,7 @@ import {
   Share,
   Brain,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { DetectionCounts } from "@/pages/dashboard";
 import { useYoloDetection } from "@/hooks/use-yolo-detection";
@@ -44,6 +45,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
   const videoContainerRef = useRef<HTMLDivElement>(null);
 
   const [isActive, setIsActive] = useState<boolean>(false);
+  const [isStarting, setIsStarting] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [fps] = useState<number>(1);
   const [detectionBoxes, setDetectionBoxes] = useState<DetectionBox[]>([]);
@@ -267,13 +269,20 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
 
   const handlePlayPause = async (): Promise<void> => {
     if (!isActive) {
-      await startCamera();
-      setIsActive(true);
+      try {
+        setIsStarting(true);
+        await startCamera();
+        setIsActive(true);
 
-      intervalRef.current = setInterval(() => {
-        runYoloDetection();
-        drawDetections();
-      }, 500);
+        intervalRef.current = setInterval(() => {
+          runYoloDetection();
+          drawDetections();
+        }, 500);
+      } catch (error) {
+        console.error("Failed to start camera:", error);
+      } finally {
+        setIsStarting(false);
+      }
     } else {
       setIsActive(false);
       stopCamera();
@@ -592,14 +601,16 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
                     ? "gradient-danger hover:opacity-90"
                     : "gradient-primary hover:opacity-90"
                 }
-                disabled={!isModelLoaded && !yoloError}
+                disabled={(!isModelLoaded && !yoloError) || isStarting}
               >
-                {isActive ? (
+                {isStarting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : isActive ? (
                   <Pause className="mr-2 h-4 w-4" />
                 ) : (
                   <Play className="mr-2 h-4 w-4" />
                 )}
-                {isActive ? "Stop Monitoring" : "Start Monitoring"}
+                {isStarting ? "Starting..." : isActive ? "Stop Monitoring" : "Start Monitoring"}
               </Button>
 
             </div>

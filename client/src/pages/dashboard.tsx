@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import MetricsCards from "@/components/dashboard/metrics-cards";
 import CameraMonitoring from "@/components/dashboard/camera-monitoring";
 import LiveMetrics from "@/components/dashboard/live-metrics";
 import AnalyticsDashboard from "@/components/dashboard/analytics-dashboard";
 import RecentAlerts from "@/components/dashboard/recent-alerts";
 import { useWebSocket } from "@/hooks/use-websocket";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { startOfMinute, addMinutes } from "date-fns";
 import { debugLogger, createDebugContext } from "@shared/debug-logger";
 
@@ -30,6 +31,9 @@ export interface SystemStatus {
 }
 
 export default function Dashboard() {
+  const isMobile = useIsMobile();
+  const cameraMonitoringRef = useRef<HTMLDivElement>(null);
+  
   const [detectionCounts, setDetectionCounts] = useState<DetectionCounts>({
     total: 0,
     people: 0,
@@ -216,6 +220,20 @@ export default function Dashboard() {
     return () => clearTimeout(timeout);
   }, [currentMinuteCounts, minuteStart]);
 
+  // Auto-scroll to CameraMonitoring on mobile
+  useEffect(() => {
+    if (isMobile && cameraMonitoringRef.current) {
+      const scrollTimeout = setTimeout(() => {
+        cameraMonitoringRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 500); // Small delay to ensure components are fully rendered
+
+      return () => clearTimeout(scrollTimeout);
+    }
+  }, [isMobile]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-slate-900 to-slate-800">
       <main className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6">
@@ -232,7 +250,7 @@ export default function Dashboard() {
         {/* Main Content Grid - Responsive layout */}
         <div className="grid gap-4 sm:gap-6 mb-4 sm:mb-6 grid-cols-1 xl:grid-cols-3">
           {/* Camera Monitoring - Takes full width on mobile, 2/3 on desktop */}
-          <div className="xl:col-span-2 w-full">
+          <div ref={cameraMonitoringRef} className="xl:col-span-2 w-full">
             <CameraMonitoring
               onDetectionUpdate={handleDetectionUpdate}
               currentDetections={detectionCounts}
