@@ -62,6 +62,11 @@
     "zeroInstall": {
       "title": "Zéro Installation",
       "description": "Tout fonctionne directement sur votre téléphone, aucune configuration complexe requise. Démarrez en quelques secondes !"
+    },
+    "contact": {
+      "title": "Des questions ?",
+      "description": "Notre équipe est là pour vous aider à optimiser votre analyse d'affluence.",
+      "button": "Nous contacter"
     }
   },
   "about": {
