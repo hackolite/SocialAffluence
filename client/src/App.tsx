@@ -10,6 +10,7 @@ import Signup from "@/pages/signup";
 import Pricing from "@/pages/pricing";
 import Contact from "@/pages/contact";
 import Dashboard from "@/pages/dashboard";
+import Account from "@/pages/account";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,13 @@ function Router() {
         {() => (
           <AppSidebar>
             <Dashboard />
+          </AppSidebar>
+        )}
+      </Route>
+      <Route path="/account">
+        {() => (
+          <AppSidebar>
+            <Account />
           </AppSidebar>
         )}
       </Route>
