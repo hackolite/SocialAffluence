@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, Clock, BarChart3, Shield, Users, Zap, CheckCircle, Star, Menu, X } from "lucide-react";
+import { ArrowRight, Eye, Clock, BarChart3, Shield, Users, Zap, CheckCircle, Star, Menu, X, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
@@ -369,6 +369,25 @@ export default function Landing() {
                   </CardContent>
                 </Card>
               </article>
+            </div>
+            
+            {/* Contact CTA */}
+            <div className="text-center mt-16">
+              <div className="max-w-2xl mx-auto">
+                <div className="flex justify-center mb-4">
+                  <div className="w-12 h-12 gradient-primary rounded-lg flex items-center justify-center">
+                    <MessageSquare className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">{t('features.contact.title')}</h3>
+                <p className="text-slate-300 mb-6">{t('features.contact.description')}</p>
+                <Button size="lg" className="gradient-primary hover:opacity-90" asChild>
+                  <a href="/contact">
+                    {t('features.contact.button')}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </a>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
