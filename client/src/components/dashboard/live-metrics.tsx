@@ -22,7 +22,7 @@ export default function LiveMetrics({ detectionCounts, systemStatus }: LiveMetri
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-4 min-h-[280px]">
           <div className="text-center">
             <div className="text-3xl font-bold text-white mb-1">{detectionCounts.total}</div>
             <div className="text-sm text-slate-400 flex items-center justify-center">
@@ -31,21 +31,23 @@ export default function LiveMetrics({ detectionCounts, systemStatus }: LiveMetri
             </div>
           </div>
           
-          {topClasses.length > 0 ? (
-            <div className="space-y-3">
-              <div className="text-sm text-slate-300 font-medium">Top Detected Classes:</div>
-              {topClasses.map(([className, count]) => (
-                <div key={className} className="flex justify-between items-center">
-                  <span className="text-sm text-slate-400 capitalize">{className}</span>
-                  <span className="text-sm font-medium text-white">{count}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-4">
-              <div className="text-sm text-slate-400">No detections yet</div>
-            </div>
-          )}
+          <div className="min-h-[120px]">
+            {topClasses.length > 0 ? (
+              <div className="space-y-3">
+                <div className="text-sm text-slate-300 font-medium">Top Detected Classes:</div>
+                {topClasses.map(([className, count]) => (
+                  <div key={className} className="flex justify-between items-center">
+                    <span className="text-sm text-slate-400 capitalize">{className}</span>
+                    <span className="text-sm font-medium text-white">{count}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <div className="text-sm text-slate-400">No detections yet</div>
+              </div>
+            )}
+          </div>
           
           <div className="border-t border-slate-700 pt-3">
             <div className="text-center">
