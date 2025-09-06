@@ -3,7 +3,7 @@ import MetricsCards from "@/components/dashboard/metrics-cards";
 import CameraMonitoring from "@/components/dashboard/camera-monitoring";
 import LiveMetrics from "@/components/dashboard/live-metrics";
 import AnalyticsDashboard from "@/components/dashboard/analytics-dashboard";
-import RecentAlerts from "@/components/dashboard/recent-alerts";
+import AlertManagement from "@/components/dashboard/alert-management";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { startOfMinute, addMinutes } from "date-fns";
@@ -267,7 +267,7 @@ export default function Dashboard() {
                 />
               </div>
               <div className="w-full">
-                <RecentAlerts />
+                <AlertManagement currentDetections={detectionCounts} />
               </div>
             </div>
           </div>
