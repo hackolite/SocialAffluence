@@ -25,11 +25,10 @@ export const useAlertMelody = () => {
         await audioContext.resume();
       }
 
-      // Define a gentle melody with pleasant frequencies
+      // Define a gentle melody with pleasant frequencies (shortened from 3 to 2 notes)
       const notes = [
         { frequency: 523.25, duration: 0.3 }, // C5
         { frequency: 659.25, duration: 0.3 }, // E5
-        { frequency: 783.99, duration: 0.5 }, // G5
       ];
 
       let startTime = audioContext.currentTime;
