@@ -63,10 +63,11 @@ export default function AlertManagement({ currentDetections }: AlertManagementPr
 
       // Check if threshold is exceeded
       if (totalDetections >= rule.detectionThreshold) {
-        // Check if we already have a recent alert for this rule (within last minute)
+        // Check if we already have a recent alert for this rule (configurable timeout)
+        const reactivationTimeout = rule.reactivationTimeoutSeconds || 60; // Default to 60 seconds for existing rules
         const recentAlert = triggeredAlerts.find(alert => 
           alert.ruleId === rule.id && 
-          (now - alert.triggeredAt.getTime()) < 60000 // 1 minute
+          (now - alert.triggeredAt.getTime()) < (reactivationTimeout * 1000)
         );
 
         if (!recentAlert) {

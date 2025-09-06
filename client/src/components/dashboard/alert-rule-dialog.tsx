@@ -24,6 +24,7 @@ export default function AlertRuleDialog({ open, onOpenChange, onCreateRule }: Al
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [timeWindowSeconds, setTimeWindowSeconds] = useState(30);
   const [detectionThreshold, setDetectionThreshold] = useState(5);
+  const [reactivationTimeoutSeconds, setReactivationTimeoutSeconds] = useState(60);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +38,7 @@ export default function AlertRuleDialog({ open, onOpenChange, onCreateRule }: Al
       classTypes: selectedClasses,
       timeWindowSeconds,
       detectionThreshold,
+      reactivationTimeoutSeconds,
       enabled: true
     });
 
@@ -45,6 +47,7 @@ export default function AlertRuleDialog({ open, onOpenChange, onCreateRule }: Al
     setSelectedClasses([]);
     setTimeWindowSeconds(30);
     setDetectionThreshold(5);
+    setReactivationTimeoutSeconds(60);
   };
 
   const handleClassToggle = (className: string, checked: boolean) => {
@@ -150,6 +153,22 @@ export default function AlertRuleDialog({ open, onOpenChange, onCreateRule }: Al
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="reactivationTimeout">Alert Reactivation Timeout (seconds)</Label>
+            <Input
+              id="reactivationTimeout"
+              type="number"
+              min="10"
+              max="300"
+              value={reactivationTimeoutSeconds}
+              onChange={(e) => setReactivationTimeoutSeconds(parseInt(e.target.value) || 60)}
+              className="bg-slate-700 border-slate-600 text-white"
+            />
+            <p className="text-xs text-slate-400">
+              Time to wait before reactivating alert: 10-300 seconds
+            </p>
+          </div>
+
           <div className="bg-slate-700/30 p-3 rounded-lg">
             <p className="text-sm text-slate-300">
               <strong>Preview:</strong> Alert will trigger when {detectionThreshold}+ 
@@ -158,7 +177,7 @@ export default function AlertRuleDialog({ open, onOpenChange, onCreateRule }: Al
                   {' '}({selectedClasses.join(', ')})
                 </span>
               )} 
-              {' '}detections occur within {timeWindowSeconds} seconds.
+              {' '}detections occur within {timeWindowSeconds} seconds. Alert will reactivate after {reactivationTimeoutSeconds} seconds.
             </p>
           </div>
 

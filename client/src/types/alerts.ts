@@ -6,6 +6,7 @@ export interface AlertRule {
   detectionThreshold: number;
   enabled: boolean;
   createdAt: Date;
+  reactivationTimeoutSeconds?: number; // Optional for backward compatibility (10-300 seconds, defaults to 60)
 }
 
 export interface TriggeredAlert {
