@@ -5,6 +5,7 @@ import { AlertTriangle, Plus, Settings, X } from "lucide-react";
 import { AlertRule, TriggeredAlert, DETECTION_CLASSES, DetectionClass } from "@/types/alerts";
 import { DetectionCounts } from "@/pages/dashboard";
 import AlertRuleDialog from "./alert-rule-dialog";
+import { useAlertMelody } from "@/hooks/useAlertMelody";
 
 interface AlertManagementProps {
   currentDetections: DetectionCounts;
@@ -18,6 +19,9 @@ export default function AlertManagement({ currentDetections }: AlertManagementPr
     timestamp: number;
     classCounts: Record<string, number>;
   }>>([]);
+
+  // Initialize alert melody hook
+  const { playMelody } = useAlertMelody();
 
   // Track detection history for time windows
   useEffect(() => {
@@ -78,6 +82,9 @@ export default function AlertManagement({ currentDetections }: AlertManagementPr
           };
 
           setTriggeredAlerts(prev => [newAlert, ...prev.slice(0, 9)]); // Keep last 10 alerts
+          
+          // Play gentle melody when alert is triggered
+          playMelody();
         }
       }
     });

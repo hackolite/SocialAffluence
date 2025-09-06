@@ -222,13 +222,20 @@ export function useYoloDetection() {
   const detectObjects = useCallback(async (videoElement: HTMLVideoElement): Promise<DetectionBox[]> => {
     const detectContext = { ...debugContext, operation: 'detectObjects' };
     
-    if (!videoElement || videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
-      debugLogger.warn(detectContext, 'Invalid video element for detection', {
+    if (!videoElement) {
+      debugLogger.warn(detectContext, 'No video element provided for detection');
+      return [];
+    }
+
+    // If video has no dimensions (no camera), use fallback with default dimensions
+    if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) {
+      debugLogger.warn(detectContext, 'Video element has no dimensions, using fallback detection', {
         hasVideoElement: !!videoElement,
         videoWidth: videoElement?.videoWidth,
         videoHeight: videoElement?.videoHeight
       });
-      return [];
+      // Use fallback detection with default dimensions when no camera access
+      return fallbackDetection(640, 480);
     }
 
     setIsProcessing(true);
