@@ -16,6 +16,7 @@ import {
   Brain,
   AlertCircle,
   Loader2,
+  Hourglass,
 } from "lucide-react";
 import { DetectionCounts } from "@/pages/dashboard";
 import { useYoloDetection } from "@/hooks/use-yolo-detection";
@@ -626,7 +627,7 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
                 disabled={(!isModelLoaded && !yoloError) || isStarting}
               >
                 {isStarting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Hourglass className="mr-2 h-4 w-4 animate-spin" />
                 ) : isActive ? (
                   <Pause className="mr-2 h-4 w-4" />
                 ) : (
