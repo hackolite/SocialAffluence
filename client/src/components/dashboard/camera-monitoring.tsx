@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   Camera,
   Activity,
@@ -64,6 +65,8 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
     isModelLoaded,
     isProcessing,
     error: yoloError,
+    loadingProgress,
+    isLoading
   } = useYoloDetection();
 
   debugLogger.debug(debugContext, 'Component initialized', {
@@ -578,6 +581,25 @@ const CameraMonitoring: React.FC<CameraMonitoringProps> = ({
 
         {/* Contrôles (masqués en plein écran) */}
         <div className={`space-y-4 ${isFullscreen ? "hidden" : ""}`}>
+          {/* Barre de progression du chargement du modèle */}
+          {isLoading && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-300">Chargement du modèle...</span>
+                <span className="text-slate-400">{Math.round(loadingProgress)}%</span>
+              </div>
+              <Progress value={loadingProgress} className="h-2" />
+            </div>
+          )}
+
+          {/* Indicateur de modèle chargé avec clignotement */}
+          {isModelLoaded && !isLoading && !yoloError && (
+            <div className="flex items-center space-x-2 text-sm text-green-400">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span>Modèle SSDLite prêt</span>
+            </div>
+          )}
+
           {yoloError && (
             <div className="bg-destructive/20 border border-destructive/50 rounded-lg p-3">
               <div className="flex items-center space-x-2">
