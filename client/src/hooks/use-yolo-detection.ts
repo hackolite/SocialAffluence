@@ -46,6 +46,8 @@ export function useYoloDetection() {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const modelRef = useRef<cocoSsd.ObjectDetection | null>(null);
 
   // Debug context for this component
@@ -65,12 +67,16 @@ export function useYoloDetection() {
         debugLogger.info(loadContext, 'Starting SSDLite MobileNetV2 model loading');
         console.log('Loading SSDLite MobileNetV2 model...');
         setError(null);
+        setIsLoading(true);
+        setLoadingProgress(10);
         
         // Initialize TensorFlow.js backend with fallback
         try {
           debugLogger.debug(loadContext, 'Setting TensorFlow.js WebGL backend');
+          setLoadingProgress(30);
           await tf.setBackend('webgl');
           await tf.ready();
+          setLoadingProgress(50);
           debugLogger.info(loadContext, 'TensorFlow.js WebGL backend ready', {
             backend: tf.getBackend(),
             memory: tf.memory()
@@ -79,8 +85,10 @@ export function useYoloDetection() {
         } catch (webglError) {
           debugLogger.warn(loadContext, 'WebGL backend failed, falling back to CPU', { error: webglError });
           console.warn('WebGL backend failed, falling back to CPU:', webglError);
+          setLoadingProgress(40);
           await tf.setBackend('cpu');
           await tf.ready();
+          setLoadingProgress(50);
           debugLogger.info(loadContext, 'TensorFlow.js CPU backend ready', {
             backend: tf.getBackend(),
             memory: tf.memory()
@@ -90,13 +98,17 @@ export function useYoloDetection() {
         
         // Load COCO-SSD with SSDLite MobileNetV2 backbone
         debugLogger.debug(loadContext, 'Loading COCO-SSD model with SSDLite MobileNetV2');
+        setLoadingProgress(70);
         const loadedModel = await cocoSsd.load({
           base: 'lite_mobilenet_v2' // This uses SSDLite MobileNetV2
         });
         
+        setLoadingProgress(90);
         modelRef.current = loadedModel;
         setModel(loadedModel);
+        setLoadingProgress(100);
         setIsModelLoaded(true);
+        setIsLoading(false);
         
         debugLogger.timeEnd(loadContext, 'modelLoad');
         debugLogger.info(loadContext, 'SSDLite MobileNetV2 model loaded successfully', {
@@ -114,6 +126,8 @@ export function useYoloDetection() {
         console.error('Error loading SSDLite MobileNetV2 model:', err);
         setError('Failed to load SSDLite MobileNetV2 model. Using fallback detection.');
         setIsModelLoaded(true); // Allow fallback mode
+        setIsLoading(false);
+        setLoadingProgress(100);
       }
     };
 
@@ -320,6 +334,8 @@ export function useYoloDetection() {
     detectObjects,
     isModelLoaded,
     isProcessing,
-    error
+    error,
+    loadingProgress,
+    isLoading
   };
 }
