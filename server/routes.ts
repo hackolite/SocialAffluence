@@ -10,7 +10,11 @@ import { debugLogger, createDebugContext } from "@shared/debug-logger";
 const debugContext = createDebugContext('Routes');
 let wss: WebSocketServer;
 
-export async function registerRoutes(app: Express): Promise<Server> {
+/**
+ * Registers all HTTP API routes on the Express app.
+ * Safe to call in serverless environments (no WebSocket, no HTTP server created).
+ */
+export function registerApiRoutes(app: Express): void {
   // Configure cookie parser middleware for secure cookie-based authentication
   app.use(cookieParser());
 
@@ -278,6 +282,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  registerApiRoutes(app);
 
   const httpServer = createServer(app);
 
