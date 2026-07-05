@@ -49,7 +49,7 @@ export function registerApiRoutes(app: Express): void {
 
   if (isGoogleConfigured) {
     app.get('/auth/google', 
-      passport.authenticate('google', { scope: ['profile', 'email'] })
+      passport.authenticate('google', { scope: ['openid', 'profile', 'email'] })
     );
 
     app.get('/auth/google/callback',
