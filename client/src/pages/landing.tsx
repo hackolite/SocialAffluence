@@ -222,6 +222,43 @@ export default function Landing() {
                       </div>
                     </article>
                   </CarouselItem>
+                  <CarouselItem>
+                    <article className="glass rounded-lg overflow-hidden border border-slate-700">
+                      <img 
+                        src="https://res.cloudinary.com/dinsxzuha/image/upload/v1783225938/Gemini_Generated_Image_174xyw174xyw174x_jlwuol.png"
+                        alt="Illustration générée montrant une analyse de foule dans un espace public"
+                        className="w-full h-64 md:h-80 object-cover"
+                      />
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold text-white mb-2">
+                          Analyse de foule en espace public
+                        </h3>
+                        <p className="text-slate-300">
+                          Notre technologie permet une analyse précise des flux de personnes dans les espaces publics,
+                          offrant des insights en temps réel pour améliorer la gestion des zones à forte affluence et garantir la sécurité des visiteurs.
+                        </p>
+                      </div>
+                    </article>
+                  </CarouselItem>
+
+                  <CarouselItem>
+                    <article className="glass rounded-lg overflow-hidden border border-slate-700">
+                      <img 
+                        src="https://res.cloudinary.com/dinsxzuha/image/upload/v1783225928/ChatGPT_Image_5_juil._2026_04_19_04_k0a2jj.png"
+                        alt="Visualisation de données d'affluence et de comptage de personnes dans un environnement commercial"
+                        className="w-full h-64 md:h-80 object-cover"
+                      />
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold text-white mb-2">
+                          Visualisation avancée des données d'affluence
+                        </h3>
+                        <p className="text-slate-300">
+                          Grâce à des tableaux de bord intuitifs, visualisez en temps réel les données de comptage et d'affluence,
+                          et prenez des décisions éclairées pour optimiser l'expérience client et la gestion opérationnelle.
+                        </p>
+                      </div>
+                    </article>
+                  </CarouselItem>
                 </CarouselContent>
                 
                 <CarouselPrevious className="bg-slate-800 border-slate-600 hover:bg-slate-700 text-white" aria-label="Exemple précédent" />
