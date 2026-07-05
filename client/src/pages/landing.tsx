@@ -244,6 +244,25 @@ export default function Landing() {
                   <CarouselItem>
                     <article className="glass rounded-lg overflow-hidden border border-slate-700">
                       <img 
+                        src="https://res.cloudinary.com/dinsxzuha/image/upload/v1783225938/Gemini_Generated_Image_uz0binuz0binuz0b_pvhjaw.png"
+                        alt="Illustration générée montrant un système de surveillance et de comptage de personnes dans un espace commercial"
+                        className="w-full h-64 md:h-80 object-cover"
+                      />
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold text-white mb-2">
+                          Surveillance intelligente en espace commercial
+                        </h3>
+                        <p className="text-slate-300">
+                          Notre système de surveillance intelligente permet de monitorer en continu les flux de personnes dans les espaces commerciaux,
+                          offrant une visibilité complète pour optimiser l'organisation et améliorer l'expérience des visiteurs.
+                        </p>
+                      </div>
+                    </article>
+                  </CarouselItem>
+
+                  <CarouselItem>
+                    <article className="glass rounded-lg overflow-hidden border border-slate-700">
+                      <img 
                         src="https://res.cloudinary.com/dinsxzuha/image/upload/v1783225928/ChatGPT_Image_5_juil._2026_04_19_04_k0a2jj.png"
                         alt="Visualisation de données d'affluence et de comptage de personnes dans un environnement commercial"
                         className="w-full h-64 md:h-80 object-cover"
