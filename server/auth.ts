@@ -1,6 +1,5 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as LocalStrategy } from "passport-local";
 import { storage } from "./storage";
 import type { User } from "@shared/schema";
 
@@ -52,19 +51,6 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_CLIENT_ID !== 'demo_clien
 } else {
   console.log('Google OAuth not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables to enable Google authentication.');
 }
-
-// Configure Local Strategy (existing username/password auth)
-passport.use(new LocalStrategy(async (username, password, done) => {
-  try {
-    const user = await storage.getUserByUsername(username);
-    if (!user || user.password !== password) {
-      return done(null, false, { message: 'Incorrect username or password.' });
-    }
-    return done(null, user);
-  } catch (error) {
-    return done(error, undefined);
-  }
-}));
 
 // Note: Passport session serialization/deserialization removed
 // Authentication now uses secure cookies with username instead of sessions

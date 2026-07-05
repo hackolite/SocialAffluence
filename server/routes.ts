@@ -111,26 +111,6 @@ export function registerApiRoutes(app: Express): void {
     });
   }
 
-  // Login with local strategy
-  app.post('/api/auth/login',
-    passport.authenticate('local', { 
-      session: false // Disable session since we're using cookies
-    }),
-    (req, res) => {
-      const user = req.user as any;
-      if (user && user.username) {
-        // Set secure username cookie for authentication
-        setUsernameCookie(res, user.username);
-        debugLogger.debug(debugContext, 'Username cookie set for local auth user', {
-          username: user.username
-        });
-        res.redirect('/dashboard');
-      } else {
-        res.redirect('/login?error=invalid_credentials');
-      }
-    }
-  );
-
   // Logout route - clears the username cookie
   app.post('/api/auth/logout', (req, res) => {
     // Clear the username cookie
