@@ -1,44 +1,9 @@
-import { useState } from "react";
-import { Eye, EyeOff, Shield, ArrowLeft } from "lucide-react";
+import { Shield, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          username: email,
-          password: password,
-        }),
-      });
-
-      if (response.redirected) {
-        window.location.href = response.url;
-      } else if (!response.ok) {
-        throw new Error('Login failed');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Erreur de connexion. Vérifiez vos identifiants.');
-    }
-  };
-
   const handleGoogleLogin = () => {
-    // Redirect to Google OAuth endpoint
     window.location.href = '/auth/google';
   };
 
@@ -73,84 +38,6 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="votre@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-white">
-                  Mot de passe
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 pr-10"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-slate-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-slate-400" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <input
-                    id="remember"
-                    type="checkbox"
-                    className="rounded border-slate-600 bg-slate-800"
-                  />
-                  <Label htmlFor="remember" className="text-sm text-slate-400">
-                    Se souvenir de moi
-                  </Label>
-                </div>
-                <Button variant="link" className="text-primary hover:text-primary/80 p-0">
-                  Mot de passe oublié ?
-                </Button>
-              </div>
-              <Button
-                type="submit"
-                className="w-full gradient-primary hover:opacity-90"
-              >
-                Se connecter
-              </Button>
-            </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full bg-slate-600" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-900 px-2 text-slate-400">
-                  Ou continuer avec
-                </span>
-              </div>
-            </div>
-
             <Button
               onClick={handleGoogleLogin}
               variant="outline"

@@ -9,7 +9,6 @@ import cookieParser from "cookie-parser";
 // server/auth.ts
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as LocalStrategy } from "passport-local";
 
 // server/storage.ts
 var MemStorage = class {
@@ -103,17 +102,6 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_CLIENT_ID !== "demo_clien
 } else {
   console.log("Google OAuth not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables to enable Google authentication.");
 }
-passport.use(new LocalStrategy(async (username, password, done) => {
-  try {
-    const user = await storage.getUserByUsername(username);
-    if (!user || user.password !== password) {
-      return done(null, false, { message: "Incorrect username or password." });
-    }
-    return done(null, user);
-  } catch (error) {
-    return done(error, void 0);
-  }
-}));
 
 // shared/debug-logger.ts
 var LogLevel = /* @__PURE__ */ ((LogLevel2) => {
@@ -347,25 +335,6 @@ function registerApiRoutes(app2) {
       });
     });
   }
-  app2.post(
-    "/api/auth/login",
-    passport.authenticate("local", {
-      session: false
-      // Disable session since we're using cookies
-    }),
-    (req, res) => {
-      const user = req.user;
-      if (user && user.username) {
-        setUsernameCookie(res, user.username);
-        debugLogger.debug(debugContext2, "Username cookie set for local auth user", {
-          username: user.username
-        });
-        res.redirect("/dashboard");
-      } else {
-        res.redirect("/login?error=invalid_credentials");
-      }
-    }
-  );
   app2.post("/api/auth/logout", (req, res) => {
     clearUsernameCookie(res);
     debugLogger.debug(debugContext2, "Username cookie cleared during logout");
