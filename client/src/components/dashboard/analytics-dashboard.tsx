@@ -104,12 +104,18 @@ export default function AnalyticsDashboard({
   });
   const allClasses = Array.from(allClassesSet);
 
-  // Class filter state — all classes visible by default
-  const [selectedClasses, setSelectedClasses] = useState<Set<string>>(
-    () => new Set(allClasses)
-  );
+  // Class filter state — start empty so visibleClasses defaults to showing all
+  const [selectedClasses, setSelectedClasses] = useState<Set<string>>(new Set());
 
-  // Keep selectedClasses in sync as new classes appear; show all if nothing selected
+  // Sync: auto-select newly detected classes so they appear by default
+  const [knownClasses, setKnownClasses] = useState<Set<string>>(new Set());
+  const newClasses = allClasses.filter((cls) => !knownClasses.has(cls));
+  if (newClasses.length > 0) {
+    setKnownClasses((prev) => new Set([...prev, ...newClasses]));
+    setSelectedClasses((prev) => new Set([...prev, ...newClasses]));
+  }
+
+  // Show all if nothing is selected (empty set = all)
   const visibleClasses =
     selectedClasses.size === 0
       ? allClasses
@@ -207,17 +213,24 @@ export default function AnalyticsDashboard({
         <button
           key={cls}
           onClick={() => toggleClass(cls)}
-          className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all capitalize ${
+          className={`relative px-2.5 py-1 rounded-full text-xs font-medium border transition-all capitalize ${
             selectedClasses.has(cls)
               ? "border-transparent text-white"
               : "bg-slate-700/30 border-slate-600/50 text-slate-500 hover:border-slate-500"
           }`}
           style={
             selectedClasses.has(cls)
-              ? { backgroundColor: `${getClassColor(cls)}33`, borderColor: getClassColor(cls), color: getClassColor(cls) }
+              ? { borderColor: getClassColor(cls), color: getClassColor(cls), backgroundColor: "transparent" }
               : undefined
           }
         >
+          {selectedClasses.has(cls) && (
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full opacity-20"
+              style={{ backgroundColor: getClassColor(cls) }}
+            />
+          )}
           {cls}
         </button>
       ))}
