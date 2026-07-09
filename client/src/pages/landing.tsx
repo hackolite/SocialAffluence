@@ -4,8 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-
 export default function Landing() {
   const { t } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -42,7 +40,6 @@ export default function Landing() {
               <a href="/contact" className="text-slate-400 hover:text-white transition-colors">
                 Contact
               </a>
-              <LanguageSwitcher />
               <Button className="gradient-primary hover:opacity-90" asChild>
                 <a href="/login">{t('navigation.login')}</a>
               </Button>
@@ -92,9 +89,6 @@ export default function Landing() {
               >
                 Contact
               </a>
-              <div className="py-2">
-                <LanguageSwitcher />
-              </div>
               <div className="pt-2">
                 <Button className="gradient-primary hover:opacity-90 w-full" asChild>
                   <a href="/login">{t('navigation.login')}</a>
