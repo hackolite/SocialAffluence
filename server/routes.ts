@@ -11,6 +11,39 @@ import nodemailer from "nodemailer";
 const debugContext = createDebugContext('Routes');
 let wss: WebSocketServer;
 
+// Simple HTML entity escaper to prevent XSS in email body
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Basic email format validation
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Build a nodemailer transporter from environment variables (created once at startup).
+// If SMTP env vars are missing the transporter will be null and the endpoint will return 503.
+function buildTransporter() {
+  const host = process.env.SMTP_HOST;
+  const port = parseInt(process.env.SMTP_PORT || '587', 10);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !user || !pass) return null;
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+  });
+}
+
+const mailerTransport = buildTransporter();
+
 /**
  * Registers all HTTP API routes on the Express app.
  * Safe to call in serverless environments (no WebSocket, no HTTP server created).
@@ -168,41 +201,32 @@ export function registerApiRoutes(app: Express): void {
         return res.status(400).json({ error: 'Email and message are required' });
       }
 
-      // Configure transporter from environment variables
-      // Required env vars: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
-      // For Gmail: SMTP_HOST=smtp.gmail.com, SMTP_PORT=587, SMTP_USER=your@gmail.com, SMTP_PASS=your_app_password
-      const smtpHost = process.env.SMTP_HOST;
-      const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
-      const smtpUser = process.env.SMTP_USER;
-      const smtpPass = process.env.SMTP_PASS;
-      const contactEmail = process.env.CONTACT_EMAIL || 'loic.laureote@gmail.com';
-
-      if (!smtpHost || !smtpUser || !smtpPass) {
-        debugLogger.error(debugContext, 'SMTP configuration missing', {
-          hasHost: !!smtpHost,
-          hasUser: !!smtpUser,
-          hasPass: !!smtpPass
-        });
-        return res.status(500).json({ error: 'Email service not configured' });
+      if (!EMAIL_REGEX.test(email)) {
+        return res.status(400).json({ error: 'Invalid email address' });
       }
 
-      const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpPort === 465,
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-      });
+      const contactEmail = process.env.CONTACT_EMAIL;
+      if (!contactEmail) {
+        debugLogger.error(debugContext, 'CONTACT_EMAIL env var not set');
+        return res.status(503).json({ error: 'Email service not configured' });
+      }
 
-      await transporter.sendMail({
-        from: `"SocialAffluence Contact" <${smtpUser}>`,
+      if (!mailerTransport) {
+        debugLogger.error(debugContext, 'SMTP transporter not initialised (missing env vars)');
+        return res.status(503).json({ error: 'Email service not configured' });
+      }
+
+      const safeEmail = escapeHtml(email);
+      const safeMessage = escapeHtml(message);
+      const safeDate = new Date().toLocaleString('fr-FR');
+
+      await mailerTransport.sendMail({
+        from: `"SocialAffluence Contact" <${process.env.SMTP_USER}>`,
         to: contactEmail,
         replyTo: email,
         subject: 'Nouveau message de contact - SocialAffluence',
-        text: `De : ${email}\nDate : ${new Date().toLocaleString('fr-FR')}\n\nMessage :\n${message}`,
-        html: `<p><strong>De :</strong> ${email}</p><p><strong>Date :</strong> ${new Date().toLocaleString('fr-FR')}</p><hr/><p><strong>Message :</strong></p><p>${message.replace(/\n/g, '<br/>')}</p>`,
+        text: `De : ${email}\nDate : ${safeDate}\n\nMessage :\n${message}`,
+        html: `<p><strong>De :</strong> ${safeEmail}</p><p><strong>Date :</strong> ${safeDate}</p><hr/><p><strong>Message :</strong></p><p>${safeMessage.replace(/\n/g, '<br/>')}</p>`,
       });
 
       debugLogger.debug(debugContext, 'Contact email sent successfully', {
