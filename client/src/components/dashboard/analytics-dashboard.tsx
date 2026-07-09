@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, PieChart, Download } from "lucide-react";
@@ -91,23 +92,112 @@ function downloadCSV(timelineData: TimelineData[]) {
   document.body.removeChild(link);
 }
 
+interface ClassFilterBarProps {
+  allClasses: string[];
+  selectedClasses: Set<string>;
+  toggleClass: (cls: string) => void;
+  toggleAll: () => void;
+}
+
+function ClassFilterBar({ allClasses, selectedClasses, toggleClass, toggleAll }: ClassFilterBarProps) {
+  return (
+    <div className="flex flex-wrap gap-2 mt-3 mb-1">
+      <button
+        onClick={toggleAll}
+        className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
+          selectedClasses.size === allClasses.length || selectedClasses.size === 0
+            ? "bg-blue-600/20 border-blue-500/50 text-blue-300"
+            : "bg-slate-700/50 border-slate-600 text-slate-400 hover:border-slate-500"
+        }`}
+      >
+        Tous
+      </button>
+      {allClasses.map((cls) => {
+        const color = getClassColor(cls);
+        const isSelected = selectedClasses.has(cls);
+        return (
+          <button
+            key={cls}
+            onClick={() => toggleClass(cls)}
+            className={`relative px-2.5 py-1 rounded-full text-xs font-medium border transition-all capitalize ${
+              isSelected
+                ? "border-transparent"
+                : "bg-slate-700/30 border-slate-600/50 text-slate-500 hover:border-slate-500"
+            }`}
+            style={isSelected ? { borderColor: color, color } : undefined}
+          >
+            {isSelected && (
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full opacity-20"
+                style={{ backgroundColor: color }}
+              />
+            )}
+            <span className="relative">{cls}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AnalyticsDashboard({
   timelineData,
   cumulativeClassCounts,
 }: AnalyticsDashboardProps) {
-  const allClassesSet = new Set<string>();
-  timelineData.forEach((item) => {
-    if (item.classCounts) {
-      Object.keys(item.classCounts).forEach((cls) => allClassesSet.add(cls));
-    }
-  });
-  const allClasses = Array.from(allClassesSet);
+  const allClasses = useMemo(() => {
+    const set = new Set<string>();
+    timelineData.forEach((item) => {
+      if (item.classCounts) {
+        Object.keys(item.classCounts).forEach((cls) => set.add(cls));
+      }
+    });
+    return Array.from(set);
+  }, [timelineData]);
+
+  // Class filter state — start with empty set; visibleClasses falls back to all
+  const [selectedClasses, setSelectedClasses] = useState<Set<string>>(new Set());
+
+  // Auto-select newly detected classes so they appear by default
+  useEffect(() => {
+    if (allClasses.length === 0) return;
+    setSelectedClasses((prev) => {
+      const hasNew = allClasses.some((cls) => !prev.has(cls));
+      if (!hasNew) return prev;
+      return new Set([...prev, ...allClasses]);
+    });
+  }, [allClasses]);
+
+  // Show all if nothing is selected (empty set = show all)
+  const visibleClasses =
+    selectedClasses.size === 0
+      ? allClasses
+      : allClasses.filter((cls) => selectedClasses.has(cls));
+
+  const toggleClass = useCallback((cls: string) => {
+    setSelectedClasses((prev) => {
+      const next = new Set(prev);
+      if (next.has(cls)) {
+        next.delete(cls);
+      } else {
+        next.add(cls);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleAll = useCallback(() => {
+    setSelectedClasses((prev) =>
+      prev.size === allClasses.length ? new Set() : new Set(allClasses)
+    );
+  // allClasses is stable (memoized), safe to include as dependency
+  }, [allClasses]);
 
   const chartDataLastHour = timelineData.slice(-60).map((item) => {
     const dataPoint: Record<string, any> = {
       name: format(new Date(item.timestamp), "HH:mm"),
     };
-    allClasses.forEach((cls) => {
+    visibleClasses.forEach((cls) => {
       dataPoint[cls] = item.classCounts?.[cls] ?? 0;
     });
     return dataPoint;
@@ -129,7 +219,7 @@ export default function AnalyticsDashboard({
       const dataPoint: Record<string, any> = {
         name: hour,
       };
-      allClasses.forEach((cls) => {
+      visibleClasses.forEach((cls) => {
         dataPoint[cls] = counts[cls] ?? 0;
       });
       return dataPoint;
@@ -166,8 +256,9 @@ export default function AnalyticsDashboard({
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-            Detection Per Minutes (Round Robin Last 59 Minutes)
+            Détections / minute (59 dernières minutes)
           </CardTitle>
+          {allClasses.length > 0 && <ClassFilterBar allClasses={allClasses} selectedClasses={selectedClasses} toggleClass={toggleClass} toggleAll={toggleAll} />}
         </CardHeader>
         <CardContent>
           <div className="h-64">
@@ -189,7 +280,7 @@ export default function AnalyticsDashboard({
                     color: "#fff",
                   }}
                 />
-                {allClasses.map((cls) => (
+                {visibleClasses.map((cls) => (
                   <Bar
                     key={cls}
                     dataKey={cls}
@@ -208,8 +299,9 @@ export default function AnalyticsDashboard({
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <TrendingUp className="h-5 w-5 mr-2 text-primary" />
-            Detection Per Hours (Round Robin Last 24 h)
+            Détections / heure (24 dernières heures)
           </CardTitle>
+          {allClasses.length > 0 && <ClassFilterBar allClasses={allClasses} selectedClasses={selectedClasses} toggleClass={toggleClass} toggleAll={toggleAll} />}
         </CardHeader>
         <CardContent>
           <div className="h-64">
@@ -231,7 +323,7 @@ export default function AnalyticsDashboard({
                     color: "#fff",
                   }}
                 />
-                {allClasses.map((cls) => (
+                {visibleClasses.map((cls) => (
                   <Bar
                     key={cls}
                     dataKey={cls}
@@ -250,7 +342,7 @@ export default function AnalyticsDashboard({
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <PieChart className="h-5 w-5 mr-2 text-primary" />
-            Distribution
+            Distribution par classe
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -258,7 +350,7 @@ export default function AnalyticsDashboard({
             {allClassesSorted.length > 0 ? (
               <div className="space-y-4">
                 <div className="text-sm text-slate-300 font-medium">
-                  Detected Classes :
+                  Classes détectées :
                 </div>
                 {allClassesSorted.map(([cls, count]) => {
                   const percentage =
@@ -293,11 +385,11 @@ export default function AnalyticsDashboard({
                       {totalPeople}
                     </div>
                     <div className="text-xs text-slate-400">
-                      Detected Persons
+                      Personnes détectées
                     </div>
                   </div>
                   <div className="text-center text-xs text-slate-400 mt-2">
-                    Total Detections (All Classes) :{" "}
+                    Total toutes classes :{" "}
                     <span className="font-semibold text-white">
                       {totalDetections}
                     </span>
@@ -307,7 +399,7 @@ export default function AnalyticsDashboard({
             ) : (
               <div className="text-center text-slate-400 py-8 select-none">
                 <PieChart className="h-12 w-12 mx-auto mb-2" />
-                <p className="text-sm">Zero detection</p>
+                <p className="text-sm">Aucune détection</p>
               </div>
             )}
           </div>
@@ -318,13 +410,13 @@ export default function AnalyticsDashboard({
         <CardHeader>
           <CardTitle className="text-lg text-white flex items-center">
             <Download className="h-5 w-5 mr-2 text-primary" />
-            Download Data (Free)
+            Exporter les données
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex justify-center">
             <Button onClick={() => downloadCSV(timelineData)}>
-              Download Affluence CSV
+              Télécharger CSV d'affluence
             </Button>
           </div>
         </CardContent>
