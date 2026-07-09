@@ -28,11 +28,11 @@ i18n
     },
     
     detection: {
-      // Order of language detection methods
-      order: ['localStorage', 'navigator', 'htmlTag', 'path', 'subdomain'],
+      // Detect language from browser settings only
+      order: ['navigator', 'htmlTag'],
       
-      // Cache user language selection
-      caches: ['localStorage'],
+      // Do not cache — always use browser language
+      caches: [],
       
       // Don't convert country code to lowercase
       convertDetectedLanguage: (lng: string) => {
