@@ -6,6 +6,7 @@ import { passport } from "./auth";
 import { storage } from "./storage";
 import { saveLoginEvent } from "./db";
 import { debugLogger, createDebugContext } from "@shared/debug-logger";
+import nodemailer from "nodemailer";
 
 const debugContext = createDebugContext('Routes');
 let wss: WebSocketServer;
@@ -167,99 +168,57 @@ export function registerApiRoutes(app: Express): void {
         return res.status(400).json({ error: 'Email and message are required' });
       }
 
-      // Prepare Slack webhook payload
-      const slackPayload = {
-        text: `Nouveau message de contact`,
-        blocks: [
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `*Nouveau message de contact*`
-            }
-          },
-          {
-            type: "section",
-            fields: [
-              {
-                type: "mrkdwn",
-                text: `*Email:*\n${email}`
-              },
-              {
-                type: "mrkdwn",
-                text: `*Date:*\n${new Date().toLocaleString('fr-FR')}`
-              }
-            ]
-          },
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `*Message:*\n${message}`
-            }
-          }
-        ]
-      };
+      // Configure transporter from environment variables
+      // Required env vars: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
+      // For Gmail: SMTP_HOST=smtp.gmail.com, SMTP_PORT=587, SMTP_USER=your@gmail.com, SMTP_PASS=your_app_password
+      const smtpHost = process.env.SMTP_HOST;
+      const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+      const smtpUser = process.env.SMTP_USER;
+      const smtpPass = process.env.SMTP_PASS;
+      const contactEmail = process.env.CONTACT_EMAIL || 'loic.laureote@gmail.com';
 
-      debugLogger.debug(debugContext, 'Sending to Slack webhook', { payloadSize: JSON.stringify(slackPayload).length });
-
-      // Send to Slack webhook using Node.js built-in fetch
-      const slackWebhookUrl = 'https://hooks.slack.com/services/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';
-      
-      try {
-        // Use dynamic import for fetch to ensure it's available
-        const { default: fetch } = await import('node-fetch');
-        
-        const response = await fetch(slackWebhookUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(slackPayload),
+      if (!smtpHost || !smtpUser || !smtpPass) {
+        debugLogger.error(debugContext, 'SMTP configuration missing', {
+          hasHost: !!smtpHost,
+          hasUser: !!smtpUser,
+          hasPass: !!smtpPass
         });
-
-        debugLogger.debug(debugContext, 'Slack webhook response', { 
-          status: response.status, 
-          statusText: response.statusText 
-        });
-
-        if (response.ok) {
-          debugLogger.debug(debugContext, 'Contact message sent to Slack successfully', {
-            email,
-            messageLength: message.length
-          });
-          res.json({ success: true });
-        } else {
-          const errorText = await response.text();
-          debugLogger.error(debugContext, 'Failed to send message to Slack', {
-            status: response.status,
-            statusText: response.statusText,
-            errorText
-          });
-          res.status(500).json({ error: 'Failed to send message' });
-        }
-      } catch (networkError: any) {
-        // Handle network errors (like in sandboxed environments)
-        if (networkError.code === 'ENOTFOUND' || networkError.message.includes('ENOTFOUND')) {
-          debugLogger.warn(debugContext, 'Network blocked in sandbox environment, simulating success', {
-            email,
-            messageLength: message.length,
-            originalError: networkError.message
-          });
-          // In production, this would be a real error, but in sandbox we simulate success
-          res.json({ success: true, note: 'Simulated success (network restricted in sandbox)' });
-        } else {
-          // Re-throw other errors
-          throw networkError;
-        }
+        return res.status(500).json({ error: 'Email service not configured' });
       }
+
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"SocialAffluence Contact" <${smtpUser}>`,
+        to: contactEmail,
+        replyTo: email,
+        subject: 'Nouveau message de contact - SocialAffluence',
+        text: `De : ${email}\nDate : ${new Date().toLocaleString('fr-FR')}\n\nMessage :\n${message}`,
+        html: `<p><strong>De :</strong> ${email}</p><p><strong>Date :</strong> ${new Date().toLocaleString('fr-FR')}</p><hr/><p><strong>Message :</strong></p><p>${message.replace(/\n/g, '<br/>')}</p>`,
+      });
+
+      debugLogger.debug(debugContext, 'Contact email sent successfully', {
+        from: email,
+        to: contactEmail,
+        messageLength: message.length
+      });
+
+      res.json({ success: true });
     } catch (error: any) {
       debugLogger.error(debugContext, 'Error in /api/contact', { 
         error: error.message, 
         stack: error.stack,
         name: error.name 
       });
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: 'Failed to send message' });
     }
   });
 }
