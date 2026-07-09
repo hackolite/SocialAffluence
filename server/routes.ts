@@ -25,8 +25,14 @@ function escapeHtml(str: string): string {
 function isValidEmail(email: string): boolean {
   const atIdx = email.indexOf('@');
   if (atIdx < 1) return false;
+  const local = email.slice(0, atIdx);
   const domain = email.slice(atIdx + 1);
-  return domain.length > 0 && domain.includes('.');
+  if (!local || !domain) return false;
+  // Domain must contain a dot, not start/end with a dot, and have no consecutive dots
+  if (!domain.includes('.')) return false;
+  if (domain.startsWith('.') || domain.endsWith('.')) return false;
+  if (domain.includes('..')) return false;
+  return true;
 }
 
 // Build a nodemailer transporter from environment variables (created once at startup).
@@ -223,7 +229,7 @@ export function registerApiRoutes(app: Express): void {
 
       const safeEmail = escapeHtml(email);
       const safeMessage = escapeHtml(message);
-      const safeDate = new Date().toLocaleString('fr-FR');
+      const safeDate = escapeHtml(new Date().toLocaleString('fr-FR'));
 
       await mailerTransport.sendMail({
         from: `"SocialAffluence Contact" <${process.env.SMTP_USER}>`,
