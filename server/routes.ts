@@ -21,8 +21,13 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
-// Basic email format validation
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Basic email format validation (linear-time, no regex backtracking)
+function isValidEmail(email: string): boolean {
+  const atIdx = email.indexOf('@');
+  if (atIdx < 1) return false;
+  const domain = email.slice(atIdx + 1);
+  return domain.length > 0 && domain.includes('.');
+}
 
 // Build a nodemailer transporter from environment variables (created once at startup).
 // If SMTP env vars are missing the transporter will be null and the endpoint will return 503.
@@ -201,7 +206,7 @@ export function registerApiRoutes(app: Express): void {
         return res.status(400).json({ error: 'Email and message are required' });
       }
 
-      if (!EMAIL_REGEX.test(email)) {
+      if (!isValidEmail(email)) {
         return res.status(400).json({ error: 'Invalid email address' });
       }
 
@@ -225,7 +230,7 @@ export function registerApiRoutes(app: Express): void {
         to: contactEmail,
         replyTo: email,
         subject: 'Nouveau message de contact - SocialAffluence',
-        text: `De : ${email}\nDate : ${safeDate}\n\nMessage :\n${message}`,
+        text: `De : ${safeEmail}\nDate : ${safeDate}\n\nMessage :\n${safeMessage}`,
         html: `<p><strong>De :</strong> ${safeEmail}</p><p><strong>Date :</strong> ${safeDate}</p><hr/><p><strong>Message :</strong></p><p>${safeMessage.replace(/\n/g, '<br/>')}</p>`,
       });
 
