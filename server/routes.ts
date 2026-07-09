@@ -6,9 +6,54 @@ import { passport } from "./auth";
 import { storage } from "./storage";
 import { saveLoginEvent } from "./db";
 import { debugLogger, createDebugContext } from "@shared/debug-logger";
+import nodemailer from "nodemailer";
 
 const debugContext = createDebugContext('Routes');
 let wss: WebSocketServer;
+
+// Simple HTML entity escaper to prevent XSS in email body
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Basic email format validation (linear-time, no regex backtracking)
+function isValidEmail(email: string): boolean {
+  const atIdx = email.indexOf('@');
+  if (atIdx < 1) return false;
+  const local = email.slice(0, atIdx);
+  const domain = email.slice(atIdx + 1);
+  if (!local || !domain) return false;
+  // Domain must contain a dot, not start/end with a dot, and have no consecutive dots
+  if (!domain.includes('.')) return false;
+  if (domain.startsWith('.') || domain.endsWith('.')) return false;
+  if (domain.includes('..')) return false;
+  return true;
+}
+
+// Build a nodemailer transporter from environment variables (created once at startup).
+// If SMTP env vars are missing the transporter will be null and the endpoint will return 503.
+function buildTransporter() {
+  const host = process.env.SMTP_HOST;
+  const port = parseInt(process.env.SMTP_PORT || '587', 10);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!host || !user || !pass) return null;
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+  });
+}
+
+const mailerTransport = buildTransporter();
 
 /**
  * Registers all HTTP API routes on the Express app.
@@ -167,99 +212,48 @@ export function registerApiRoutes(app: Express): void {
         return res.status(400).json({ error: 'Email and message are required' });
       }
 
-      // Prepare Slack webhook payload
-      const slackPayload = {
-        text: `Nouveau message de contact`,
-        blocks: [
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `*Nouveau message de contact*`
-            }
-          },
-          {
-            type: "section",
-            fields: [
-              {
-                type: "mrkdwn",
-                text: `*Email:*\n${email}`
-              },
-              {
-                type: "mrkdwn",
-                text: `*Date:*\n${new Date().toLocaleString('fr-FR')}`
-              }
-            ]
-          },
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `*Message:*\n${message}`
-            }
-          }
-        ]
-      };
-
-      debugLogger.debug(debugContext, 'Sending to Slack webhook', { payloadSize: JSON.stringify(slackPayload).length });
-
-      // Send to Slack webhook using Node.js built-in fetch
-      const slackWebhookUrl = 'https://hooks.slack.com/services/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';
-      
-      try {
-        // Use dynamic import for fetch to ensure it's available
-        const { default: fetch } = await import('node-fetch');
-        
-        const response = await fetch(slackWebhookUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(slackPayload),
-        });
-
-        debugLogger.debug(debugContext, 'Slack webhook response', { 
-          status: response.status, 
-          statusText: response.statusText 
-        });
-
-        if (response.ok) {
-          debugLogger.debug(debugContext, 'Contact message sent to Slack successfully', {
-            email,
-            messageLength: message.length
-          });
-          res.json({ success: true });
-        } else {
-          const errorText = await response.text();
-          debugLogger.error(debugContext, 'Failed to send message to Slack', {
-            status: response.status,
-            statusText: response.statusText,
-            errorText
-          });
-          res.status(500).json({ error: 'Failed to send message' });
-        }
-      } catch (networkError: any) {
-        // Handle network errors (like in sandboxed environments)
-        if (networkError.code === 'ENOTFOUND' || networkError.message.includes('ENOTFOUND')) {
-          debugLogger.warn(debugContext, 'Network blocked in sandbox environment, simulating success', {
-            email,
-            messageLength: message.length,
-            originalError: networkError.message
-          });
-          // In production, this would be a real error, but in sandbox we simulate success
-          res.json({ success: true, note: 'Simulated success (network restricted in sandbox)' });
-        } else {
-          // Re-throw other errors
-          throw networkError;
-        }
+      if (!isValidEmail(email)) {
+        return res.status(400).json({ error: 'Invalid email address' });
       }
+
+      const contactEmail = process.env.CONTACT_EMAIL;
+      if (!contactEmail) {
+        debugLogger.error(debugContext, 'CONTACT_EMAIL env var not set');
+        return res.status(503).json({ error: 'Email service not configured' });
+      }
+
+      if (!mailerTransport) {
+        debugLogger.error(debugContext, 'SMTP transporter not initialised (missing env vars)');
+        return res.status(503).json({ error: 'Email service not configured' });
+      }
+
+      const safeEmail = escapeHtml(email);
+      const safeMessage = escapeHtml(message);
+      const safeDate = escapeHtml(new Date().toLocaleString('fr-FR'));
+
+      await mailerTransport.sendMail({
+        from: `"SocialAffluence Contact" <${process.env.SMTP_USER}>`,
+        to: contactEmail,
+        replyTo: email,
+        subject: 'Nouveau message de contact - SocialAffluence',
+        text: `De : ${safeEmail}\nDate : ${safeDate}\n\nMessage :\n${safeMessage}`,
+        html: `<p><strong>De :</strong> ${safeEmail}</p><p><strong>Date :</strong> ${safeDate}</p><hr/><p><strong>Message :</strong></p><p>${safeMessage.replace(/\n/g, '<br/>')}</p>`,
+      });
+
+      debugLogger.debug(debugContext, 'Contact email sent successfully', {
+        from: email,
+        to: contactEmail,
+        messageLength: message.length
+      });
+
+      res.json({ success: true });
     } catch (error: any) {
       debugLogger.error(debugContext, 'Error in /api/contact', { 
         error: error.message, 
         stack: error.stack,
         name: error.name 
       });
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: 'Failed to send message' });
     }
   });
 }

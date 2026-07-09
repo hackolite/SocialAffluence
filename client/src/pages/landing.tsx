@@ -202,65 +202,6 @@ export default function Landing() {
                   <CarouselItem>
                     <article className="glass rounded-lg overflow-hidden border border-slate-700">
                       <img 
-                        src="/img/obj.png" 
-                        alt="Interface d'analyse montrant la détection automatique de personnes dans un magasin avec zones de densité en temps réel et compteurs de flux clients"
-                        className="w-full h-64 md:h-80 object-cover"
-                      />
-                      <div className="p-6">
-                        <h3 className="text-xl font-semibold text-white mb-2">
-                          {t('examples.urbanAnalysis.title')}
-                        </h3>
-                        <p className="text-slate-300">
-                        Notre solution de comptage et d’analyse en temps réel permet de transformer la gestion des flux urbains en un véritable levier d’efficacité et de qualité de vie. 
-                        Grâce à des algorithmes avancés de détection et d’IA, nous fournissons des données précises sur la densité (sous forme de heatmap- à venir) 
-                        et les déplacements des personnes dans les espaces publics, 
-                        commerces, gares, transports, et zones événementielles.
-                        </p>
-                      </div>
-                    </article>
-                  </CarouselItem>
-                  
-                  <CarouselItem>
-                    <article className="glass rounded-lg overflow-hidden border border-slate-700">
-                      <img 
-                        src="/img/bottle.png" 
-                        alt="Système de monitoring des files d'attente avec alertes automatiques pour temps d'attente et suggestions d'ouverture de caisses supplémentaires"
-                        className="w-full h-64 md:h-80 object-cover"
-                      />
-                      <div className="p-6">
-                        <h3 className="text-xl font-semibold text-white mb-2">
-                        Analyse comportementale avancée en magasin 
-                        </h3>
-                        <p className="text-slate-300">
-                         En fournissant des données précises sur le nombre de clients, leur répartition et leur parcours à l’intérieur du magasin, 
-                          les équipes peuvent optimiser l’agencement des rayons, améliorer le service client et adapter les ressources en fonction des pics d’activité. 
-                          Ces informations permettent également de mesurer l’impact des promotions, d’anticiper les flux et de créer une expérience client plus fluide et satisfaisante.
-                        </p>
-                      </div>
-                    </article>
-                  </CarouselItem>
-                  
-                  <CarouselItem>
-                    <article className="glass rounded-lg overflow-hidden border border-slate-700">
-                      <img 
-                        src="/img/boat.jpeg" 
-                        alt="Carte de chaleur comportementale des clients avec trajectoires de mouvement et zones d'intérêt pour optimisation du placement produits"
-                        className="w-full h-64 md:h-80 object-cover"
-                      />
-                      <div className="p-6">
-                        <h3 className="text-xl font-semibold text-white mb-2">
-                          Gestion intelligente des zones portuaire, plaisance ou commerce
-                        </h3>
-                        <p className="text-slate-300">
-                        En fournissant des données précises sur le nombre de navires, leur position, leur rotation et leur temps de séjour, 
-                        les opérateurs peuvent optimiser le planning de déchargement et de chargement, réduire les temps d’attente et améliorer la fluidité des opérations.
-                        </p>
-                      </div>
-                    </article>
-                  </CarouselItem>
-                  <CarouselItem>
-                    <article className="glass rounded-lg overflow-hidden border border-slate-700">
-                      <img 
                         src="https://res.cloudinary.com/dinsxzuha/image/upload/v1783225938/Gemini_Generated_Image_174xyw174xyw174x_jlwuol.png"
                         alt="Illustration générée montrant une analyse de foule dans un espace public"
                         className="w-full h-64 md:h-80 object-cover"
