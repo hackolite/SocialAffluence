@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, PieChart, Download } from "lucide-react";
@@ -145,13 +145,15 @@ export default function AnalyticsDashboard({
   timelineData,
   cumulativeClassCounts,
 }: AnalyticsDashboardProps) {
-  const allClassesSet = new Set<string>();
-  timelineData.forEach((item) => {
-    if (item.classCounts) {
-      Object.keys(item.classCounts).forEach((cls) => allClassesSet.add(cls));
-    }
-  });
-  const allClasses = Array.from(allClassesSet);
+  const allClasses = useMemo(() => {
+    const set = new Set<string>();
+    timelineData.forEach((item) => {
+      if (item.classCounts) {
+        Object.keys(item.classCounts).forEach((cls) => set.add(cls));
+      }
+    });
+    return Array.from(set);
+  }, [timelineData]);
 
   // Class filter state — start with empty set; visibleClasses falls back to all
   const [selectedClasses, setSelectedClasses] = useState<Set<string>>(new Set());
@@ -164,7 +166,7 @@ export default function AnalyticsDashboard({
       if (!hasNew) return prev;
       return new Set([...prev, ...allClasses]);
     });
-  }, [allClasses.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [allClasses]);
 
   // Show all if nothing is selected (empty set = show all)
   const visibleClasses =
@@ -188,6 +190,7 @@ export default function AnalyticsDashboard({
     setSelectedClasses((prev) =>
       prev.size === allClasses.length ? new Set() : new Set(allClasses)
     );
+  // allClasses is stable (memoized), safe to include as dependency
   }, [allClasses]);
 
   const chartDataLastHour = timelineData.slice(-60).map((item) => {
